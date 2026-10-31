@@ -18,7 +18,7 @@
       --brand-pine: #114e4a;
       --accent-cyan: #13c0ce;
       
-      /* Step 02 Exercise Palette from Image Reference */
+      /* Step 02 Reference Image Palette */
       --pill-squat: #a7f3d0;
       --pill-squat-txt: #065f46;
       --pill-curl: #fecdd3;
@@ -49,14 +49,14 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: radial-gradient(circle at 50% 10%, #f4fafb 0%, #d8ecef 100%);
+      background: radial-gradient(circle at 50% 10%, #f4fafb 0%, #d8ecef 100%) !important;
       color: var(--text-dark);
       display: flex;
       justify-content: center;
       align-items: center;
     }
 
-    /* Outer Wrapper: No Black Background */
+    /* Outer Wrapper: Pure Light Theme Across Entire Laptop Monitor */
     #app-container {
       position: relative;
       width: 100vw;
@@ -64,7 +64,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: radial-gradient(circle at 50% 10%, #f4fafb 0%, #d8ecef 100%);
+      background: radial-gradient(circle at 50% 10%, #f4fafb 0%, #d8ecef 100%) !important;
       overflow: hidden;
     }
 
@@ -74,7 +74,7 @@
       width: 100%;
       height: 100%;
       max-width: min(100vw, calc(100vh * 9 / 16));
-      background: #e2f1f3; /* Light background instead of black */
+      background: #e2f1f3;
       overflow: hidden;
       box-shadow: 0 10px 40px rgba(17, 78, 74, 0.12);
     }
@@ -96,7 +96,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      background: #eaf5f7; /* Light canvas placeholder */
+      background: #eaf5f7;
     }
 
     /* Light Theme HUD Panels */
@@ -111,7 +111,7 @@
       pointer-events: auto;
     }
 
-    /* TOP PANEL - Styled directly to match the image header */
+    /* TOP PANEL - Offset below camera punch-hole and notches */
     .header-bar {
       position: absolute;
       top: 55px;
@@ -171,7 +171,7 @@
 
     .hud-btn:active { background: #dcf2f5; }
 
-    /* Exercise Selector Bar matching Step 02 Pills */
+    /* Exercise Selector Bar matching Step 02 Reference */
     .controls-row {
       display: flex;
       justify-content: space-between;
@@ -213,7 +213,7 @@
       transform: scale(1.04);
     }
 
-    /* Target Goal Button matching Step 03 Target Pill */
+    /* Target Goal Pill */
     .target-pill {
       background: #ffffff;
       border: 1.5px solid #fb7185;
@@ -237,7 +237,7 @@
       color: var(--brand-pine);
     }
 
-    /* LEFT-DOCKED TELEMETRY COLUMN */
+    /* LEFT TELEMETRY COLUMN */
     .telemetry-column {
       position: absolute;
       left: 10px;
@@ -279,7 +279,7 @@
       font-variant-numeric: tabular-nums;
     }
 
-    /* BOTTOM PROGRESS BAR */
+    /* PROGRESS DEPTH GAUGE */
     .footer-bar {
       position: absolute;
       bottom: 14px;
@@ -315,9 +315,9 @@
       transition: width 0.08s ease-out;
     }
 
-    /* TARGET GOAL POPUP MODAL */
+    /* TARGET GOAL INPUT MODAL */
     #goal-modal, #celebration-card {
-      position: absolute;
+      position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
@@ -327,7 +327,7 @@
       padding: 22px;
       text-align: center;
       display: none;
-      z-index: 250;
+      z-index: 100000;
       box-shadow: 0 12px 40px rgba(17, 78, 74, 0.2);
       width: 85%;
       max-width: 310px;
@@ -347,16 +347,18 @@
       outline: none;
     }
 
-    /* FULLPAGE ONBOARDING / USER MANUAL (Guaranteed visible on laptops & phones) */
+    /* FULLSCREEN INDEPENDENT ONBOARDING GUIDE OVERLAY */
     #manual-splash {
-      position: absolute;
+      position: fixed;
       inset: 0;
+      width: 100vw;
+      height: 100vh;
       background: radial-gradient(circle at 50% 10%, #f4fafb 0%, #e2eff1 100%);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      z-index: 300;
-      padding: 35px 16px 20px 16px;
+      z-index: 99999;
+      padding: 30px 16px 20px 16px;
       overflow-y: auto;
       align-items: center;
     }
@@ -511,120 +513,120 @@
 </head>
 <body>
 
-  <!-- LIGHT-THEMED VIEWPORT WRAPPER -->
+  <!-- ROOT CONTAINER -->
   <div id="app-container">
-    <div id="phone-frame">
 
-      <!-- FRONT PAGE GUIDE (Centered and visible on Laptop and Phone) -->
-      <div id="manual-splash">
-        <div style="display: flex; flex-direction: column; width: 100%; align-items: center;">
-          <div class="splash-top-banner">⚡ ACTIVE BIOMECHANICS V2.8 // MOTION HUB</div>
-          <h1 class="splash-title">BIOMECHANIC COACH</h1>
-          <p class="splash-subtitle">Real-Time Joint Tracking & Exercise Analytics</p>
+    <!-- FRONT PAGE: FULLSCREEN OVERLAY GUARANTEED TO DISPLAY ON ALL MONITORS -->
+    <div id="manual-splash">
+      <div style="display: flex; flex-direction: column; width: 100%; align-items: center;">
+        <div class="splash-top-banner">⚡ ACTIVE BIOMECHANICS V2.8 // MOTION HUB</div>
+        <h1 class="splash-title">BIOMECHANIC COACH</h1>
+        <p class="splash-subtitle">Real-Time Joint Tracking & Exercise Analytics</p>
 
-          <!-- Centered Reference Card -->
-          <div class="reference-card-container">
-            <div class="card-header-label">ONBOARDING SYSTEM READINESS CHECKLIST</div>
+        <!-- Centered Reference Card[cite: 5, 6] -->
+        <div class="reference-card-container">
+          <div class="card-header-label">ONBOARDING SYSTEM READINESS CHECKLIST</div>
 
-            <div class="checklist-2x2-grid">
-              <!-- Tile 1: Camera Framing -->
-              <div class="ref-tile">
-                <span class="tile-step-indicator">STEP 01</span>
-                <div class="tile-graphic-area">
-                  <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
-                    <rect x="4" y="10" width="16" height="11" rx="2" stroke="#0f2c35" stroke-width="1.8" fill="#f8fafc"/>
-                    <circle x="12" y="15.5" r="1.5" fill="#14b8a6"/>
-                    <line x1="12" y1="21" x2="8" y2="35" stroke="#0f2c35" stroke-width="1.8" stroke-linecap="round"/>
-                    <line x1="12" y1="21" x2="16" y2="35" stroke="#0f2c35" stroke-width="1.8" stroke-linecap="round"/>
-                    <circle cx="34" cy="12" r="3" fill="#fb7185"/>
-                    <path d="M34 15v8l-4 5v6M34 23l5 4 4 7" stroke="#114e4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </div>
-                <div class="tile-headline">CAMERA FRAMING</div>
-                <div class="tile-description">Place phone on a stable surface. Stand sideways for Squats/Lunges.</div>
+          <div class="checklist-2x2-grid">
+            <!-- Tile 1: Camera Framing -->
+            <div class="ref-tile">
+              <span class="tile-step-indicator">STEP 01</span>
+              <div class="tile-graphic-area">
+                <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
+                  <rect x="4" y="10" width="16" height="11" rx="2" stroke="#0f2c35" stroke-width="1.8" fill="#f8fafc"/>
+                  <circle x="12" y="15.5" r="1.5" fill="#14b8a6"/>
+                  <line x1="12" y1="21" x2="8" y2="35" stroke="#0f2c35" stroke-width="1.8" stroke-linecap="round"/>
+                  <line x1="12" y1="21" x2="16" y2="35" stroke="#0f2c35" stroke-width="1.8" stroke-linecap="round"/>
+                  <circle cx="34" cy="12" r="3" fill="#fb7185"/>
+                  <path d="M34 15v8l-4 5v6M34 23l5 4 4 7" stroke="#114e4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
               </div>
+              <div class="tile-headline">CAMERA FRAMING</div>
+              <div class="tile-description">Place phone on a stable surface. Stand sideways for Squats/Lunges.</div>
+            </div>
 
-              <!-- Tile 2: Select Exercise -->
-              <div class="ref-tile">
-                <span class="tile-step-indicator">STEP 02</span>
-                <div class="tile-graphic-area">
-                  <div class="mini-pills-preview">
-                    <div class="mini-pill" style="background: var(--pill-squat); color: var(--pill-squat-txt);">Squats</div>
-                    <div class="mini-pill" style="background: var(--pill-curl); color: var(--pill-curl-txt);">Curls</div>
-                    <div class="mini-pill" style="background: var(--pill-press); color: var(--pill-press-txt);">Press</div>
-                    <div class="mini-pill" style="background: var(--pill-raise); color: var(--pill-raise-txt);">Raises</div>
-                  </div>
+            <!-- Tile 2: Select Exercise -->
+            <div class="ref-tile">
+              <span class="tile-step-indicator">STEP 02</span>
+              <div class="tile-graphic-area">
+                <div class="mini-pills-preview">
+                  <div class="mini-pill" style="background: var(--pill-squat); color: var(--pill-squat-txt);">Squats</div>
+                  <div class="mini-pill" style="background: var(--pill-curl); color: var(--pill-curl-txt);">Curls</div>
+                  <div class="mini-pill" style="background: var(--pill-press); color: var(--pill-press-txt);">Press</div>
+                  <div class="mini-pill" style="background: var(--pill-raise); color: var(--pill-raise-txt);">Raises</div>
                 </div>
-                <div class="tile-headline">SELECT EXERCISE</div>
-                <div class="tile-description">Switch between 6 pre-configured movement profiles in header pills.</div>
               </div>
+              <div class="tile-headline">SELECT EXERCISE</div>
+              <div class="tile-description">Switch between 6 pre-configured movement profiles in header pills.</div>
+            </div>
 
-              <!-- Tile 3: Target Goal -->
-              <div class="ref-tile">
-                <span class="tile-step-indicator">STEP 03</span>
-                <div class="tile-graphic-area">
-                  <svg width="40" height="40" viewBox="0 0 36 36" fill="none">
-                    <circle cx="18" cy="18" r="14" stroke="#fb7185" stroke-width="2" fill="#fff"/>
-                    <circle cx="18" cy="18" r="9" stroke="#0284c7" stroke-width="2"/>
-                    <circle cx="18" cy="18" r="4" fill="#fb7185"/>
-                  </svg>
-                </div>
-                <div class="tile-headline">TARGET GOAL</div>
-                <div class="tile-description">Tap Goal to set custom target. Track RPM, cadence, & finish alerts.</div>
+            <!-- Tile 3: Target Goal -->
+            <div class="ref-tile">
+              <span class="tile-step-indicator">STEP 03</span>
+              <div class="tile-graphic-area">
+                <svg width="40" height="40" viewBox="0 0 36 36" fill="none">
+                  <circle cx="18" cy="18" r="14" stroke="#fb7185" stroke-width="2" fill="#fff"/>
+                  <circle cx="18" cy="18" r="9" stroke="#0284c7" stroke-width="2"/>
+                  <circle cx="18" cy="18" r="4" fill="#fb7185"/>
+                </svg>
               </div>
+              <div class="tile-headline">TARGET GOAL</div>
+              <div class="tile-description">Tap Goal to set custom target. Track RPM, cadence, & finish alerts.</div>
+            </div>
 
-              <!-- Tile 4: Audio & Visual Cues -->
-              <div class="ref-tile">
-                <span class="tile-step-indicator">STEP 04</span>
-                <div class="tile-graphic-area">
-                  <svg width="42" height="42" viewBox="0 0 40 40" fill="none">
-                    <path d="M6 14h5l6-5v18l-6-5H6z" fill="#f59e0b"/>
-                    <path d="M20 12c2 2 2 8 0 10" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
-                    <circle cx="28" cy="10" r="3" fill="#14b8a6"/>
-                    <circle cx="34" cy="20" r="3" fill="#14b8a6"/>
-                    <circle cx="28" cy="30" r="3" fill="#14b8a6"/>
-                    <line x1="28" y1="10" x2="34" y2="20" stroke="#114e4a" stroke-width="1.8"/>
-                    <line x1="34" y1="20" x2="28" y2="30" stroke="#114e4a" stroke-width="1.8"/>
-                  </svg>
-                </div>
-                <div class="tile-headline">AUDIO & VISUAL</div>
-                <div class="tile-description">Skeletal lines on keypoints. Voice guides you on form and count.</div>
+            <!-- Tile 4: Audio & Visual Cues -->
+            <div class="ref-tile">
+              <span class="tile-step-indicator">STEP 04</span>
+              <div class="tile-graphic-area">
+                <svg width="42" height="42" viewBox="0 0 40 40" fill="none">
+                  <path d="M6 14h5l6-5v18l-6-5H6z" fill="#f59e0b"/>
+                  <path d="M20 12c2 2 2 8 0 10" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+                  <circle cx="28" cy="10" r="3" fill="#14b8a6"/>
+                  <circle cx="34" cy="20" r="3" fill="#14b8a6"/>
+                  <circle cx="28" cy="30" r="3" fill="#14b8a6"/>
+                  <line x1="28" y1="10" x2="34" y2="20" stroke="#114e4a" stroke-width="1.8"/>
+                  <line x1="34" y1="20" x2="28" y2="30" stroke="#114e4a" stroke-width="1.8"/>
+                </svg>
               </div>
+              <div class="tile-headline">AUDIO & VISUAL</div>
+              <div class="tile-description">Skeletal lines on keypoints. Voice guides you on form and count.</div>
             </div>
           </div>
         </div>
-
-        <!-- Launch Action -->
-        <div class="splash-controls-wrap">
-          <button class="btn-launch-feed" id="btn-launch-app">INITIALIZE CAMERA FEED</button>
-          <div class="splash-footer-notes">v2.8 Stable • No hardware required • Powered by MediaPipe & WebRTC</div>
-        </div>
       </div>
 
-      <!-- TARGET GOAL INPUT MODAL -->
-      <div id="goal-modal">
-        <h3 style="font-size: 16px; font-weight: 800; color: var(--brand-pine);">Set Target Repetition Limit</h3>
-        <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Enter how many reps to complete:</p>
-        <input type="number" id="custom-goal-input" class="modal-input" min="1" max="999" value="10">
-        <div style="display: flex; gap: 10px; justify-content: center;">
-          <button class="hud-btn" id="btn-save-goal" style="background: var(--brand-pine); color: #fff; padding: 9px 22px;">SAVE</button>
-          <button class="hud-btn" id="btn-close-goal" style="padding: 9px 22px;">CANCEL</button>
-        </div>
+      <!-- Launch Action -->
+      <div class="splash-controls-wrap">
+        <button class="btn-launch-feed" id="btn-launch-app">INITIALIZE CAMERA FEED</button>
+        <div class="splash-footer-notes">v2.8 Stable • No hardware required • Powered by MediaPipe & WebRTC</div>
       </div>
+    </div>
 
-      <!-- TARGET REACHED CELEBRATION MODAL -->
-      <div id="celebration-card">
-        <div style="font-size: 32px; margin-bottom: 6px;">🎉</div>
-        <div style="font-size: 16px; font-weight: 900; color: var(--brand-pine); margin-bottom: 4px;">TARGET COMPLETED</div>
-        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;" id="target-summary">All reps validated.</div>
-        <button class="btn-launch-feed" id="btn-dismiss-goal" style="padding: 10px; margin-top: 0;">CONTINUE</button>
+    <!-- TARGET GOAL INPUT MODAL -->
+    <div id="goal-modal">
+      <h3 style="font-size: 16px; font-weight: 800; color: var(--brand-pine);">Set Target Repetition Limit</h3>
+      <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Enter how many reps to complete:</p>
+      <input type="number" id="custom-goal-input" class="modal-input" min="1" max="999" value="10">
+      <div style="display: flex; gap: 10px; justify-content: center;">
+        <button class="hud-btn" id="btn-save-goal" style="background: var(--brand-pine); color: #fff; padding: 9px 22px;">SAVE</button>
+        <button class="hud-btn" id="btn-close-goal" style="padding: 9px 22px;">CANCEL</button>
       </div>
+    </div>
 
-      <!-- CAMERA STREAM & HUD -->
+    <!-- TARGET REACHED CELEBRATION MODAL -->
+    <div id="celebration-card">
+      <div style="font-size: 32px; margin-bottom: 6px;">🎉</div>
+      <div style="font-size: 16px; font-weight: 900; color: var(--brand-pine); margin-bottom: 4px;">TARGET COMPLETED</div>
+      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;" id="target-summary">All reps validated.</div>
+      <button class="btn-launch-feed" id="btn-dismiss-goal" style="padding: 10px; margin-top: 0;">CONTINUE</button>
+    </div>
+
+    <!-- MAIN APP CANVAS FRAME -->
+    <div id="phone-frame">
       <video id="video-feed" playsinline></video>
       <canvas id="render-canvas"></canvas>
 
-      <!-- Top Bar: Styled to Theme & Lowered on Mobile -->
+      <!-- Top Bar -->
       <div class="hud-card header-bar">
         <div class="top-meta-row">
           <div class="brand-title">
@@ -640,7 +642,7 @@
           </div>
         </div>
 
-        <!-- Mode Pills (Theme-matched to Step 02) -->
+        <!-- Mode Pills -->
         <div class="controls-row">
           <div class="mode-pills" id="mode-pills-container">
             <button class="mode-pill active" data-mode="SQUATS">Squats</button>
@@ -658,7 +660,7 @@
         </div>
       </div>
 
-      <!-- Left Docked Telemetry (Zero body obstruction) -->
+      <!-- Left Docked Telemetry -->
       <div class="telemetry-column">
         <div class="hud-card metric-card">
           <span class="metric-label">Rep Count</span>
@@ -682,7 +684,7 @@
         </div>
       </div>
 
-      <!-- Bottom Flexion Depth Progress Bar -->
+      <!-- Bottom Progress Bar -->
       <div class="hud-card footer-bar">
         <div class="progress-header">
           <span>FLEXION TARGET DEPTH</span>
@@ -692,8 +694,8 @@
           <div class="progress-fill" id="progress-bar"></div>
         </div>
       </div>
-
     </div>
+
   </div>
 
   <script>
@@ -800,7 +802,7 @@
       timerEl.textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
     }, 1000);
 
-    // Audio & Voice Engine
+    // Audio Engine
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function speakText(text) {
       if (!voiceEnabled || !('speechSynthesis' in window)) return;
