@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Biomechanic Coach - Motion Hub</title>
   
   <!-- MediaPipe Pose CDN Scripts -->
@@ -27,13 +27,17 @@
       --pill-raise-txt: #854d0e;
       --text-dark: #0f2c35;
       --text-muted: #587987;
+      
+      /* Safe-area insets for phones with notches / dynamic islands */
+      --safe-top: env(safe-area-inset-top, 20px);
+      --safe-bottom: env(safe-area-inset-bottom, 12px);
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       user-select: none;
     }
 
@@ -43,41 +47,31 @@
       overflow: hidden;
       background: radial-gradient(circle at 50% 10%, #f2fafb 0%, #d8ecef 100%);
       color: var(--text-dark);
+    }
+
+    /* Full-screen responsive viewport for both Laptop and Mobile */
+    #app-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
     }
 
-    /* Fixed Laptop & Phone Viewport: Keeps camera layout identical on all screen sizes */
-    #phone-frame {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      max-width: 440px; /* Constrains laptops to true phone portrait aspect ratio */
-      max-height: 100vh;
-      background: #000;
-      overflow: hidden;
-      box-shadow: 0 12px 48px rgba(17, 78, 74, 0.15);
-      border-radius: 0;
-    }
-
-    @media (min-width: 480px) {
-      #phone-frame {
-        height: 96vh;
-        border-radius: 24px;
-        border: 4px solid #ffffff;
-      }
-    }
-
     video { display: none; }
 
+    /* Canvas maintains uniform camera proportions without stretching */
     canvas {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain; /* Keeps identical aspect ratio framing between phone and laptop */
+      background: #080d14;
     }
 
     /* Glassmorphism HUD Panels */
@@ -92,12 +86,14 @@
       pointer-events: auto;
     }
 
-    /* TOP BAR */
+    /* TOP BAR - Compensates for phone notches and camera punch-holes */
     .header-bar {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      right: 10px;
+      top: calc(var(--safe-top) + 12px); /* Lowered so it never overlaps phone status bar */
+      left: 12px;
+      right: 12px;
+      max-width: 600px;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -151,7 +147,7 @@
 
     .hud-btn:active { background: #e0f2f4; }
 
-    /* Exercise Selector Pills (Theme-matched to reference graphic) */
+    /* Exercise Selector Pills */
     .controls-row {
       display: flex;
       justify-content: space-between;
@@ -215,11 +211,11 @@
       color: var(--brand-pine);
     }
 
-    /* LEFT-DOCKED TELEMETRY (Leaves person fully visible) */
+    /* LEFT-DOCKED TELEMETRY COLUMN */
     .telemetry-column {
       position: absolute;
-      left: 10px;
-      top: 130px;
+      left: 12px;
+      top: calc(var(--safe-top) + 140px);
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -260,9 +256,11 @@
     /* BOTTOM PROGRESS DEPTH GAUGE */
     .footer-bar {
       position: absolute;
-      bottom: 10px;
-      left: 10px;
-      right: 10px;
+      bottom: calc(var(--safe-bottom) + 8px);
+      left: 12px;
+      right: 12px;
+      max-width: 600px;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
       gap: 5px;
@@ -334,12 +332,14 @@
       flex-direction: column;
       justify-content: space-between;
       z-index: 300;
-      padding: 16px;
+      padding: calc(var(--safe-top) + 10px) 16px calc(var(--safe-bottom) + 10px) 16px;
       overflow-y: auto;
+      align-items: center;
     }
 
     .poster-container {
       width: 100%;
+      max-width: 440px;
       border-radius: 18px;
       overflow: hidden;
       border: 1px solid var(--card-border);
@@ -355,6 +355,11 @@
       height: auto;
       display: block;
       object-fit: contain;
+    }
+
+    .splash-controls-wrap {
+      width: 100%;
+      max-width: 440px;
     }
 
     .btn-launch-feed {
@@ -385,17 +390,16 @@
 </head>
 <body>
 
-  <!-- MOBILE-STANDARDIZED CANVAS VIEWPORT -->
-  <div id="phone-frame">
+  <!-- FULL RESPONSIVE APP CONTAINER -->
+  <div id="app-container">
 
-    <!-- FRONT PAGE: EXACT POSTER DISPLAY -->
+    <!-- FRONT PAGE: EMBEDDED GUIDE DISPLAY -->
     <div id="manual-splash">
       <div class="poster-container">
-        <!-- Loads guide.png from your repository -->
         <img src="guide.png" alt="Active Biomechanics Coach Guide" class="poster-img" id="poster-element" onerror="this.src='https://raw.githubusercontent.com/tharun1234758/workout-coach/main/guide.png';">
       </div>
 
-      <div>
+      <div class="splash-controls-wrap">
         <button class="btn-launch-feed" id="btn-launch-app">INITIALIZE CAMERA FEED</button>
         <div class="splash-footer-notes">v2.8 Stable • No hardware required • Powered by MediaPipe & WebRTC</div>
       </div>
@@ -424,7 +428,7 @@
     <video id="video-feed" playsinline></video>
     <canvas id="render-canvas"></canvas>
 
-    <!-- Top Bar -->
+    <!-- Top Bar (Pushed down to prevent status bar overlap) -->
     <div class="hud-card header-bar">
       <div class="top-meta-row">
         <div class="brand-title">
@@ -662,7 +666,6 @@
       if (res.poseLandmarks) {
         const lm = res.poseLandmarks;
 
-        // Auto Side Detection (left vs right profile)
         const leftScore = (lm[cfg.left_joints[0]]?.visibility || 0) + (lm[cfg.left_joints[1]]?.visibility || 0);
         const rightScore = (lm[cfg.right_joints[0]]?.visibility || 0) + (lm[cfg.right_joints[1]]?.visibility || 0);
         const activeJoints = rightScore > leftScore ? cfg.right_joints : cfg.left_joints;
@@ -820,7 +823,7 @@
       e.target.textContent = voiceEnabled ? "VOL" : "MUTED";
     };
 
-    // Robust Target Rep Goal Input Handlers
+    // Target Rep Goal Handlers
     document.getElementById('btn-open-goal').onclick = (e) => {
       e.stopPropagation();
       goalInput.value = targetGoal;
