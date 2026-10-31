@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sports Biomechanics AI - Kinematic Vision Platform</title>
+  <title>Biomechanic Coach - AI Active HUD</title>
   
   <!-- MediaPipe Pose CDN Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
@@ -12,15 +12,17 @@
 
   <style>
     :root {
-      --bg-base: #0a0d14;
-      --panel-bg: rgba(16, 22, 34, 0.92);
-      --panel-border: #26324a;
-      --accent-primary: #38bdf8;
-      --accent-success: #34d399;
-      --accent-caution: #fbbf24;
-      --accent-danger: #f87171;
-      --text-main: #f1f5f9;
-      --text-dim: #94a3b8;
+      --bg-base: #eaf3f5;
+      --bg-active: #d6e8ed;
+      --panel-bg: rgba(255, 255, 255, 0.94);
+      --panel-border: rgba(132, 172, 191, 0.35);
+      --accent-primary: #0284c7; /* Sky Blue */
+      --accent-teal: #14b8a6;    /* Mint / Active UI */
+      --accent-coral: #f43f5e;   /* Curls Highlight */
+      --accent-amber: #f59e0b;   /* Press Highlight */
+      --accent-mint: #34d399;    /* Completed/Positive Status */
+      --text-main: #0f2a35;
+      --text-dim: #4b6a7a;
       --mono-font: "SF Mono", "Roboto Mono", "Fira Code", monospace;
     }
     * {
@@ -45,7 +47,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: #000;
+      background: radial-gradient(circle at center, #edf6f9 0%, #cbd5e1 100%);
     }
     video { display: none; }
     
@@ -66,17 +68,17 @@
       object-fit: cover;
     }
 
-    /* Tactical HUD Card Styling */
+    /* Elegant Light-Themed HUD Card */
     .hud-card {
       background: var(--panel-bg);
       border: 1px solid var(--panel-border);
-      border-radius: 8px;
-      padding: 8px 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+      border-radius: 12px;
+      padding: 10px 14px;
+      box-shadow: 0 4px 20px rgba(11, 40, 56, 0.08), 0 10px 30px rgba(0, 0, 0, 0.04);
       pointer-events: auto;
     }
 
-    /* TOP HEADER */
+    /* TOP HEADER (Fixed to Top) */
     .header-bar {
       position: absolute;
       top: 10px;
@@ -94,19 +96,18 @@
     }
     .brand-title {
       font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
       color: var(--text-main);
       display: flex;
       align-items: center;
       gap: 6px;
-      font-family: var(--mono-font);
     }
     .status-pip {
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: var(--accent-success);
+      background: var(--accent-mint);
     }
     .hud-controls {
       display: flex;
@@ -114,8 +115,8 @@
       align-items: center;
     }
     .hud-btn {
-      background: #1e293b;
-      border: 1px solid var(--panel-border);
+      background: #f1f5f9;
+      border: 1px solid rgba(132, 172, 191, 0.35);
       color: var(--text-main);
       height: 28px;
       padding: 0 10px;
@@ -124,13 +125,12 @@
       align-items: center;
       justify-content: center;
       font-size: 11px;
-      font-weight: 600;
-      font-family: var(--mono-font);
+      font-weight: 700;
       cursor: pointer;
     }
-    .hud-btn:active { background: #334155; }
+    .hud-btn:active { background: #e2e8f0; }
 
-    /* Exercise Selector Bar */
+    /* Horizontal Exercise Selectors */
     .controls-row {
       display: flex;
       justify-content: space-between;
@@ -148,50 +148,47 @@
     .mode-pills::-webkit-scrollbar { display: none; }
     
     .mode-pill {
-      background: #111827;
-      border: 1px solid #1f293d;
+      background: #f8fafc;
+      border: 1px solid rgba(132, 172, 191, 0.3);
       color: var(--text-dim);
-      padding: 5px 11px;
-      border-radius: 6px;
+      padding: 5px 12px;
+      border-radius: 20px;
       font-size: 11px;
-      font-weight: 600;
-      font-family: var(--mono-font);
+      font-weight: 700;
       white-space: nowrap;
       cursor: pointer;
       flex-shrink: 0;
       transition: all 0.15s ease;
     }
     .mode-pill.active {
-      background: #1e293b;
-      color: var(--accent-primary);
-      border-color: var(--accent-primary);
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #0284c7;
     }
     .target-pill {
-      background: #111827;
-      border: 1px solid var(--accent-caution);
-      color: var(--accent-caution);
+      background: #fff8eb;
+      border: 1px solid var(--accent-amber);
+      color: var(--accent-amber);
       padding: 5px 10px;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 11px;
-      font-weight: 700;
-      font-family: var(--mono-font);
+      font-weight: 800;
       cursor: pointer;
       white-space: nowrap;
       flex-shrink: 0;
     }
 
-    /* Live Dynamic Feedback Bar */
+    /* Live Feedback / Cue Notification */
     .feedback-banner {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      font-family: var(--mono-font);
-      color: var(--text-dim);
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--accent-primary);
     }
 
-    /* STRICT DOCKED LEFT TELEMETRY (Off-Center) */
+    /* LEFT SIDE TELEMETRY STRIP (Fixed, No Body Overlaps) */
     .telemetry-column {
       position: absolute;
       left: 10px;
@@ -206,32 +203,31 @@
       padding: 6px 10px;
       display: flex;
       flex-direction: column;
-      border-left: 2px solid var(--panel-border);
+      border-left: 3px solid rgba(132, 172, 191, 0.25);
     }
-    .metric-card.active-border { border-left-color: var(--accent-primary); }
+    .metric-card.active-border { border-left-color: var(--accent-teal); }
     .metric-label {
       font-size: 8px;
-      font-weight: 700;
+      font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.8px;
+      letter-spacing: 0.6px;
       color: var(--text-dim);
-      font-family: var(--mono-font);
     }
     .metric-value-huge {
-      font-size: 28px;
-      font-weight: 800;
+      font-size: 26px;
+      font-weight: 900;
       line-height: 1.05;
-      color: var(--accent-success);
-      font-family: var(--mono-font);
+      color: #0d9488;
+      font-variant-numeric: tabular-nums;
     }
     .metric-value {
       font-size: 13px;
-      font-weight: 700;
-      color: #f8fafc;
-      font-family: var(--mono-font);
+      font-weight: 800;
+      color: var(--text-main);
+      font-variant-numeric: tabular-nums;
     }
 
-    /* BOTTOM PROGRESS BAR */
+    /* BOTTOM PROGRESS GUAGE */
     .footer-bar {
       position: absolute;
       bottom: 10px;
@@ -245,49 +241,48 @@
     .progress-header {
       display: flex;
       justify-content: space-between;
-      font-size: 10px;
-      font-weight: 700;
+      font-size: 10.5px;
+      font-weight: 800;
       color: var(--text-dim);
-      font-family: var(--mono-font);
     }
     .progress-track {
       width: 100%;
       height: 6px;
-      background: #111827;
+      background: #e2e8f0;
       border-radius: 3px;
       overflow: hidden;
-      border: 1px solid var(--panel-border);
+      border: 1px solid rgba(132, 172, 191, 0.2);
     }
     .progress-fill {
       width: 0%;
       height: 100%;
-      background: var(--accent-primary);
+      background: var(--accent-teal);
       transition: width 0.08s ease-out;
     }
 
-    /* CELEBRATION MODAL */
+    /* GOAL ACHIEVEMENT CARD (Modal) */
     #celebration-card {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: rgba(15, 23, 42, 0.98);
-      border: 1px solid var(--accent-success);
-      border-radius: 8px;
+      background: var(--panel-bg);
+      border: 2px solid var(--accent-teal);
+      border-radius: 12px;
       padding: 24px;
       text-align: center;
       display: none;
       z-index: 250;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+      box-shadow: 0 10px 40px rgba(11, 40, 56, 0.15);
       width: 85%;
       max-width: 320px;
     }
 
-    /* PROFESSIONAL APP GUIDE / ONBOARDING SCREEN */
+    /* PREMIUM APP ONBOARDING / REFRESING GUIDE PANEL */
     #manual-splash {
       position: absolute;
       inset: 0;
-      background: #090d16;
+      background: linear-gradient(185deg, #eef7f6 0%, #edf2f7 100%);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -295,75 +290,99 @@
       padding: 24px 20px;
       overflow-y: auto;
     }
-    .spec-header {
-      border-bottom: 1px solid var(--panel-border);
-      padding-bottom: 14px;
-      margin-bottom: 16px;
+    .welcome-header {
+      border-bottom: 2px solid rgba(132, 172, 191, 0.15);
+      padding-bottom: 12px;
+      margin-bottom: 14px;
     }
-    .spec-badge {
+    .welcome-badge {
       display: inline-block;
-      padding: 3px 8px;
-      border-radius: 4px;
-      background: #1e293b;
-      border: 1px solid var(--panel-border);
-      font-size: 10px;
-      font-weight: 700;
-      font-family: var(--mono-font);
-      color: var(--accent-primary);
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: #e6f6f4;
+      border: 1px solid #99f6e4;
+      font-size: 11px;
+      font-weight: 800;
+      color: #0d9488;
       margin-bottom: 6px;
+    }
+    .exercise-cards {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .exercise-illustration {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 90px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    }
+    .exercise-illustration svg {
+      width: 36px;
+      height: 36px;
+      margin-bottom: 4px;
+    }
+    .exercise-illustration span {
+      font-size: 9.5px;
+      font-weight: 800;
+      color: var(--text-dim);
     }
     .checklist-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 10px;
-      margin-bottom: 20px;
+      gap: 8px;
+      margin-bottom: 16px;
     }
     .checklist-item {
-      background: #0f172a;
-      border: 1px solid var(--panel-border);
-      border-radius: 6px;
-      padding: 12px 14px;
+      background: var(--panel-bg);
+      border: 1px solid rgba(132, 172, 191, 0.2);
+      border-radius: 8px;
+      padding: 10px 12px;
       display: flex;
       gap: 12px;
       align-items: flex-start;
+      box-shadow: 0 2px 8px rgba(11,40,56,0.03);
     }
     .checklist-idx {
-      font-family: var(--mono-font);
       font-size: 11px;
-      font-weight: 700;
-      color: var(--accent-primary);
-      background: #1e293b;
-      padding: 2px 6px;
-      border-radius: 4px;
+      font-weight: 800;
+      color: #0ea5e9;
+      background: #e0f2fe;
+      padding: 3px 6px;
+      border-radius: 6px;
       flex-shrink: 0;
     }
     .checklist-body h4 {
       font-size: 12px;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 2px;
-      font-family: var(--mono-font);
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 1px;
     }
     .checklist-body p {
-      font-size: 11.5px;
+      font-size: 11px;
       color: var(--text-dim);
-      line-height: 1.4;
+      line-height: 1.35;
     }
     .btn-launch {
-      background: var(--accent-primary);
-      color: #040810;
+      background: #14b8a6; /* Refreshing Mint */
+      color: #ffffff;
       border: none;
       padding: 14px;
-      border-radius: 6px;
-      font-size: 13px;
+      border-radius: 8px;
+      font-size: 14px;
       font-weight: 800;
-      font-family: var(--mono-font);
-      letter-spacing: 0.5px;
       cursor: pointer;
+      box-shadow: 0 4px 12px rgba(20, 184, 166, 0.25);
       width: 100%;
     }
 
-    /* Laptop Responsive Adaptation */
+    /* Laptop Responsive Alignment */
     @media (min-width: 768px) {
       .header-bar { left: 20px; right: 20px; top: 20px; }
       .telemetry-column {
@@ -382,60 +401,85 @@
 </head>
 <body>
 
-  <!-- SYSTEM USER MANUAL / ONBOARDING -->
+  <!-- SYSTEMS REFRESHING USER MANUAL & CHECKLIST -->
   <div id="manual-splash">
     <div>
-      <div class="spec-header">
-        <div class="spec-badge">SYSTEM ARCHITECTURE // VER 3.2</div>
-        <h2 style="font-size: 20px; font-weight: 800; letter-spacing: 0.5px;">Kinematic Biomechanics Hub</h2>
-        <p style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">
-          Hardware-free real-time joint angular tracking & telemetry evaluation.
+      <div class="welcome-header">
+        <div class="welcome-badge">⭐ ACTIVE BIOMECHANICS V2.8 // MOTION HUB</div>
+        <h2 style="font-size: 20px; font-weight: 800; color: #0f2a35;">BIOMECHANIC COACH</h2>
+        <p style="font-size: 12px; color: var(--text-dim); margin-top: 3px;">
+          Real-Time Joint Tracking & Exercise Analytics. Hardware-free kinetic evaluation.
         </p>
+      </div>
+
+      <!-- Animated Graphic Exercise Category Badges -->
+      <div class="exercise-cards">
+        <div class="exercise-illustration">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="5" r="2.5"/>
+            <path d="M12 7.5v6l-3 4-2-1m5-3l3 4 2-1M9 10l3-1 3 1"/>
+          </svg>
+          <span>Squats</span>
+        </div>
+        <div class="exercise-illustration">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-coral)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="5" r="2.5"/>
+            <path d="M12 7.5v7l-2 3M12 14.5l2 3M9 10l-2-1 1-2m6 3l2-1-1-2"/>
+          </svg>
+          <span>Curls</span>
+        </div>
+        <div class="exercise-illustration">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-amber)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="5" r="2.5"/>
+            <path d="M12 7.5v8l-2.5 3.5M12 15.5l2.5 3.5M7 6l5 3 5-3"/>
+          </svg>
+          <span>Press</span>
+        </div>
       </div>
 
       <div class="checklist-grid">
         <div class="checklist-item">
           <div class="checklist-idx">01</div>
           <div class="checklist-body">
-            <h4>OPTICAL FRAMING</h4>
-            <p>Ensure phone or laptop is static. Position athlete showing lateral sagittal profile (hip, knee, ankle) for squats & lunges; coronal profile for raises.</p>
+            <h4>CAMERA FRAMING</h4>
+            <p>Place phone on a stable surface. Stand sideways for Squats & Lunges; face front for Raises & Presses.</p>
           </div>
         </div>
 
         <div class="checklist-item">
           <div class="checklist-idx">02</div>
           <div class="checklist-body">
-            <h4>KINEMATIC SELECTION</h4>
-            <p>Switch between 6 pre-configured movement profiles from the header: Squats, Curls, Overhead Press, Lateral Raises, Lunges, or Leg Extensions.</p>
+            <h4>SELECT EXERCISE</h4>
+            <p>Switch between 6 pre-configured movement profiles from the header mode pills.</p>
           </div>
         </div>
 
         <div class="checklist-item">
           <div class="checklist-idx">03</div>
           <div class="checklist-body">
-            <h4>TARGET CONSTRAINTS</h4>
-            <p>Tap the <b>GOAL</b> badge to configure any target repetition limit. The system tracks cadence (RPM) and signals target completion.</p>
+            <h4>TARGET GOAL</h4>
+            <p>Tap the Goal button to set any custom target. Track RPM, cadence, and get alerts on completion.</p>
           </div>
         </div>
 
         <div class="checklist-item">
           <div class="checklist-idx">04</div>
           <div class="checklist-body">
-            <h4>CALIBRATION & CUES</h4>
-            <p>Visual skeletal connections render on body keypoints. Auditory telemetry provides counts and form validation cues automatically.</p>
+            <h4>AUDIO & VISUAL CUES</h4>
+            <p>Skeletal wireframes render on keypoints with real-time joint angles. Voices guide you on form and count.</p>
           </div>
         </div>
       </div>
     </div>
 
-    <button class="btn-launch" id="btn-launch-app">INITIALIZE SYSTEM RUNTIME</button>
+    <button class="btn-launch" id="btn-launch-app">INITIALIZE CAMERA FEED</button>
   </div>
 
   <!-- CELEBRATION MODAL -->
   <div id="celebration-card">
-    <div style="font-size: 14px; font-weight: 800; color: var(--accent-success); margin-bottom: 4px; font-family: var(--mono-font);">TARGET COMPLETED</div>
-    <div style="font-size: 12px; color: var(--text-dim); margin-bottom: 16px; font-family: var(--mono-font);" id="target-summary">All reps validated.</div>
-    <button class="hud-btn" id="btn-dismiss-goal" style="width: 100%;">ACKNOWLEDGE</button>
+    <div style="font-size: 14px; font-weight: 800; color: var(--accent-teal); margin-bottom: 4px; font-family: var(--mono-font);">TARGET COMPLETED</div>
+    <div style="font-size: 11.5px; color: var(--text-dim); margin-bottom: 16px;" id="target-summary">All reps successfully validated.</div>
+    <button class="hud-btn" id="btn-dismiss-goal" style="width: 100%;">CONTINUE</button>
   </div>
 
   <div id="viewport">
@@ -452,7 +496,7 @@
           <span>BIOMECHANIC CORE</span>
         </div>
         <div class="hud-controls">
-          <span style="font-size: 11px; font-family: var(--mono-font); color: var(--accent-primary);" id="session-time">00:00</span>
+          <span style="font-size: 11.5px; font-weight: 700; color: var(--accent-primary);" id="session-time">00:00</span>
           <button class="hud-btn" id="btn-manual">MANUAL</button>
           <button class="hud-btn" id="btn-audio">VOL</button>
           <button class="hud-btn" id="btn-flip">CAM</button>
@@ -460,7 +504,7 @@
         </div>
       </div>
 
-      <!-- Movement Selection & Working Target Goal -->
+      <!-- Selected Profile and Goals -->
       <div class="controls-row">
         <div class="mode-pills" id="mode-pills-container">
           <button class="mode-pill active" data-mode="SQUATS">Squats</button>
@@ -473,13 +517,13 @@
         <button class="target-pill" id="btn-open-goal">GOAL: <span id="goal-display">10</span></button>
       </div>
 
-      <!-- Coaching Status Message -->
+      <!-- Feedback Cue notification banner -->
       <div class="feedback-banner">
-        <span id="cue-text">System Standby: Locate athlete</span>
+        <span id="cue-text">Identify target: Place athlete in frame</span>
       </div>
     </div>
 
-    <!-- 2. Docked Left Telemetry Stack (Fixed to Left Margin) -->
+    <!-- 2. Docked Left Telemetry Stack -->
     <div class="telemetry-column">
       <div class="hud-card metric-card active-border">
         <span class="metric-label">Rep Count</span>
@@ -495,18 +539,18 @@
       </div>
       <div class="hud-card metric-card">
         <span class="metric-label">Energy</span>
-        <span class="metric-value" id="val-cal" style="color: var(--accent-caution);">0.0 kcal</span>
+        <span class="metric-value" id="val-cal" style="color: var(--accent-amber);">0.0 kcal</span>
       </div>
       <div class="hud-card metric-card">
         <span class="metric-label">Form Grade</span>
-        <span class="metric-value" id="val-form" style="color: var(--accent-success);">NOMINAL</span>
+        <span class="metric-value" id="val-form" style="color: #0d9488;">READY</span>
       </div>
     </div>
 
-    <!-- 3. Bottom Intensity Gauge -->
+    <!-- 3. Bottom Intensity Indicator -->
     <div class="hud-card footer-bar">
       <div class="progress-header">
-        <span>KINEMATIC FLEXION</span>
+        <span>FLEXION TARGET DEPTH</span>
         <span id="progress-pct">0%</span>
       </div>
       <div class="progress-track">
@@ -516,17 +560,16 @@
   </div>
 
   <script>
-    // 6 EXERCISES WITH PRECISE BIOMECHANICAL BOUNDARIES
     const DRILLS = {
       SQUATS: {
         name: "Squats",
         left_joints: [23, 25, 27],   // Hip -> Knee -> Ankle
         right_joints: [24, 26, 28],
-        min_ang: 115,  // Parallel depth
-        max_ang: 152,  // Upright standing
-        invert: true,
+        min_ang: 115,  // Comfortable parallel squat
+        max_ang: 152,  // Extended upright
+        invert: true,  // Less angle = deep squat
         cal_per_rep: 0.32,
-        cues: { down: "Flex knees: Lower hips", up: "Extend upright", ready: "Begin squat descent" }
+        cues: { down: "Descend hips", up: "Extend upright", ready: "Begin squat descent" }
       },
       BICEP_CURLS: {
         name: "Bicep Curls",
@@ -536,7 +579,7 @@
         max_ang: 148,
         invert: true,
         cal_per_rep: 0.18,
-        cues: { down: "Flex arm: Curl to shoulder", up: "Extend arm fully", ready: "Begin arm curl" }
+        cues: { down: "Flex arm: Curl up", up: "Extend arm fully", ready: "Start arm curl" }
       },
       SHOULDER_PRESS: {
         name: "Overhead Press",
@@ -546,7 +589,7 @@
         max_ang: 155,
         invert: false,
         cal_per_rep: 0.25,
-        cues: { down: "Extend overhead", up: "Descend to shoulder height", ready: "Press upward" }
+        cues: { down: "Extend overhead", up: "Descend to shoulder", ready: "Press upward" }
       },
       LATERAL_RAISES: {
         name: "Lateral Raises",
@@ -556,27 +599,27 @@
         max_ang: 85,
         invert: false,
         cal_per_rep: 0.16,
-        cues: { down: "Abduct arms to horizontal", up: "Adduct arms to sides", ready: "Raise arms laterally" }
+        cues: { down: "Abduct arms outward", up: "Adduct arms to sides", ready: "Raise arms laterally" }
       },
       LUNGES: {
         name: "Forward Lunges",
-        left_joints: [23, 25, 27],
+        left_joints: [23, 25, 27],   // Hip -> Lead Knee -> Ankle
         right_joints: [24, 26, 28],
         min_ang: 105,
         max_ang: 150,
         invert: true,
         cal_per_rep: 0.35,
-        cues: { down: "Descend lead knee", up: "Push back upright", ready: "Step into lunge" }
+        cues: { down: "Lunge downward", up: "Push back to start", ready: "Perform forward lunge" }
       },
       LEG_EXTENSIONS: {
         name: "Leg Extensions",
-        left_joints: [23, 25, 27],
+        left_joints: [23, 25, 27],   // Hip -> Knee -> Ankle
         right_joints: [24, 26, 28],
         min_ang: 95,
         max_ang: 155,
         invert: false,
         cal_per_rep: 0.20,
-        cues: { down: "Extend knee forward", up: "Flex back to seat", ready: "Extend lower leg" }
+        cues: { down: "Extend lower leg out", up: "Allow leg back down", ready: "Perform leg extension" }
       }
     };
 
@@ -592,7 +635,7 @@
     let currentFacingMode = "user";
     let startTime = null;
 
-    // DOM References
+    // DOM Elements
     const video = document.getElementById('video-feed');
     const canvas = document.getElementById('render-canvas');
     const ctx = canvas.getContext('2d');
@@ -610,14 +653,14 @@
     const targetSummary = document.getElementById('target-summary');
     const manualSplash = document.getElementById('manual-splash');
 
-    // System Timer
+    // Live Timer
     setInterval(() => {
       if (!startTime) return;
       const s = Math.floor((Date.now() - startTime) / 1000);
       timerEl.textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
     }, 1000);
 
-    // Audio Telemetry
+    // Audio / Voice Synthesis Integration
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function speakText(text) {
       if (!voiceEnabled || !('speechSynthesis' in window)) return;
@@ -632,9 +675,9 @@
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
-      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5 note chimes
+      osc.frequency.exponentialRampToValueAtTime(783.99, audioCtx.currentTime + 0.1); // G5 note
+      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
       osc.connect(gain);
       gain.connect(audioCtx.destination);
@@ -648,7 +691,7 @@
       return ang > 180.0 ? 360.0 - ang : ang;
     }
 
-    // MediaPipe Pose Initialization
+    // MediaPipe Pose Inference engine
     const pose = new Pose({
       locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}`
     });
@@ -680,7 +723,6 @@
       if (res.poseLandmarks) {
         const lm = res.poseLandmarks;
 
-        // Auto Side Detection
         const leftScore = (lm[cfg.left_joints[0]]?.visibility || 0) + (lm[cfg.left_joints[1]]?.visibility || 0);
         const rightScore = (lm[cfg.right_joints[0]]?.visibility || 0) + (lm[cfg.right_joints[1]]?.visibility || 0);
         const activeJoints = rightScore > leftScore ? cfg.right_joints : cfg.left_joints;
@@ -694,9 +736,9 @@
           const raw = getAngle(p1, p2, p3);
           smoothedAngle = smoothedAngle === null ? raw : 0.32 * raw + 0.68 * smoothedAngle;
 
-          // Technical Biomechanical Joint Wireframe (Matte styling)
-          ctx.lineWidth = 3;
-          ctx.strokeStyle = "#38bdf8";
+          // Technical wireframe connection (mint accent highlight)
+          ctx.lineWidth = 3.5;
+          ctx.strokeStyle = "#14b8a6";
           ctx.beginPath();
           ctx.moveTo(p1.x * w, p1.y * h);
           ctx.lineTo(p2.x * w, p2.y * h);
@@ -706,20 +748,20 @@
           [p1, p2, p3].forEach(pt => {
             ctx.fillStyle = "#ffffff";
             ctx.beginPath();
-            ctx.arc(pt.x * w, pt.y * h, 4, 0, 2 * Math.PI);
+            ctx.arc(pt.x * w, pt.y * h, 5, 0, 2 * Math.PI);
             ctx.fill();
-            ctx.strokeStyle = "#38bdf8";
+            ctx.strokeStyle = "#14b8a6";
             ctx.stroke();
           });
 
-          // State Machine Engine
+          // Biomechanical State Machine Trigger
           const now = Date.now();
           if (cfg.invert) {
             if (smoothedAngle <= cfg.min_ang) {
               reachedPeak = true;
               state = "PEAK";
               formEl.textContent = "VALID";
-              formEl.style.color = "var(--accent-success)";
+              formEl.style.color = "#0ea5e9";
               cueText.textContent = cfg.cues.up;
             } else if (smoothedAngle >= cfg.max_ang) {
               if (reachedPeak && state === "PEAK") {
@@ -744,7 +786,7 @@
               reachedPeak = true;
               state = "PEAK";
               formEl.textContent = "VALID";
-              formEl.style.color = "var(--accent-success)";
+              formEl.style.color = "#0ea5e9";
               cueText.textContent = cfg.cues.up;
             } else if (smoothedAngle <= cfg.min_ang) {
               if (reachedPeak && state === "PEAK") {
@@ -771,7 +813,7 @@
       ctx.restore();
 
       if (!valid) {
-        cueText.textContent = "Optical Search: Position body in frame";
+        cueText.textContent = "Identifying target: Place athlete in frame";
         formEl.textContent = "SEARCH";
         formEl.style.color = "var(--text-dim)";
         smoothedAngle = cfg.invert ? cfg.max_ang : cfg.min_ang;
@@ -792,18 +834,18 @@
 
       progressBar.style.width = `${pct}%`;
       progressPct.textContent = `${pct}%`;
-      progressBar.style.background = pct >= 95 ? "var(--accent-success)" : "var(--accent-primary)";
+      progressBar.style.background = pct >= 95 ? "var(--accent-mint)" : "var(--accent-primary)";
     }
 
     function checkGoalAchievement() {
       if (reps >= targetGoal) {
         celebrationCard.style.display = 'block';
-        targetSummary.textContent = `Successfully completed ${targetGoal} reps of ${DRILLS[activeMode].name}.`;
-        speakText(`Goal completed.`);
+        targetSummary.textContent = `Target completed! Finished ${targetGoal} reps of ${DRILLS[activeMode].name}.`;
+        speakText(`Goal reached.`);
       }
     }
 
-    // Camera Lifecycle
+    // Camera Stream Management
     let cameraInstance = null;
     function initCamera() {
       if (cameraInstance) cameraInstance.stop();
@@ -816,7 +858,7 @@
       cameraInstance.start();
     }
 
-    // Button Listeners
+    // Navigation and UI Handlers
     document.getElementById('btn-flip').onclick = () => {
       currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
       initCamera();
@@ -837,16 +879,16 @@
       e.target.textContent = voiceEnabled ? "VOL" : "MUTED";
     };
 
-    // Robust Target Rep Goal Input Handler (Always Works)
+    // Robust Goal Setting (Prompt always responds)
     document.getElementById('btn-open-goal').onclick = () => {
-      const inputVal = window.prompt("Enter Target Repetition Limit:", String(targetGoal));
+      const inputVal = window.prompt("Adjust repetition Target limit:", String(targetGoal));
       if (inputVal !== null) {
         const parsed = parseInt(inputVal.trim(), 10);
         if (!isNaN(parsed) && parsed > 0 && parsed <= 999) {
           targetGoal = parsed;
           goalDisplay.textContent = targetGoal;
         } else {
-          alert("Please enter a valid positive number (1-999).");
+          alert("Input valid Target integer (1-999).");
         }
       }
     };
@@ -859,7 +901,6 @@
       celebrationCard.style.display = 'none';
     };
 
-    // Mode Selector Handler
     document.querySelectorAll('.mode-pill').forEach(btn => {
       btn.onclick = (e) => {
         document.querySelectorAll('.mode-pill').forEach(b => b.classList.remove('active'));
