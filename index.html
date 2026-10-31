@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Biomechanic Coach - Motion Hub</title>
+  <title>Biomechanic Coach - Active Motion Hub</title>
   
   <!-- MediaPipe Pose CDN Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
@@ -27,10 +27,6 @@
       --pill-raise-txt: #854d0e;
       --text-dark: #0f2c35;
       --text-muted: #587987;
-      
-      /* Safe-area insets for phones with notches / dynamic islands */
-      --safe-top: env(safe-area-inset-top, 20px);
-      --safe-bottom: env(safe-area-inset-bottom, 12px);
     }
 
     * {
@@ -39,39 +35,48 @@
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body, html {
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: radial-gradient(circle at 50% 10%, #f2fafb 0%, #d8ecef 100%);
+      background: radial-gradient(circle at 50% 10%, #f2fafb 0%, #cce3e6 100%);
       color: var(--text-dark);
-    }
-
-    /* Full-screen responsive viewport for both Laptop and Mobile */
-    #app-container {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      background: #000;
-      overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
     }
 
+    /* Fixed Laptop & Phone Viewport: Keeps camera layout identical on all screen sizes */
+    #phone-frame {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      max-width: min(100vw, calc(100vh * 9 / 16)); /* Strict 9:16 mobile portrait ratio on laptops */
+      background: #000;
+      overflow: hidden;
+      box-shadow: 0 12px 48px rgba(17, 78, 74, 0.2);
+    }
+
+    @media (min-width: 600px) {
+      #phone-frame {
+        height: 96vh;
+        border-radius: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.8);
+      }
+    }
+
     video { display: none; }
 
-    /* Canvas maintains uniform camera proportions without stretching */
     canvas {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      object-fit: contain; /* Keeps identical aspect ratio framing between phone and laptop */
-      background: #080d14;
+      object-fit: cover;
     }
 
     /* Glassmorphism HUD Panels */
@@ -89,11 +94,9 @@
     /* TOP BAR - Compensates for phone notches and camera punch-holes */
     .header-bar {
       position: absolute;
-      top: calc(var(--safe-top) + 12px); /* Lowered so it never overlaps phone status bar */
-      left: 12px;
-      right: 12px;
-      max-width: 600px;
-      margin: 0 auto;
+      top: 55px; /* Pushed down to clear the phone notch, camera cutout & address bar */
+      left: 10px;
+      right: 10px;
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -214,8 +217,8 @@
     /* LEFT-DOCKED TELEMETRY COLUMN */
     .telemetry-column {
       position: absolute;
-      left: 12px;
-      top: calc(var(--safe-top) + 140px);
+      left: 10px;
+      top: 195px; /* Pushed down proportionally */
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -256,11 +259,9 @@
     /* BOTTOM PROGRESS DEPTH GAUGE */
     .footer-bar {
       position: absolute;
-      bottom: calc(var(--safe-bottom) + 8px);
-      left: 12px;
-      right: 12px;
-      max-width: 600px;
-      margin: 0 auto;
+      bottom: 14px;
+      left: 10px;
+      right: 10px;
       display: flex;
       flex-direction: column;
       gap: 5px;
@@ -323,7 +324,7 @@
       outline: none;
     }
 
-    /* START SCREEN: EMBEDS EXACT POSTER GRAPHIC */
+    /* START SCREEN: EMBEDS EXACT POSTER GRAPHIC & CHECKLIST CARD */
     #manual-splash {
       position: absolute;
       inset: 0;
@@ -332,34 +333,124 @@
       flex-direction: column;
       justify-content: space-between;
       z-index: 300;
-      padding: calc(var(--safe-top) + 10px) 16px calc(var(--safe-bottom) + 10px) 16px;
+      padding: 40px 16px 20px 16px;
       overflow-y: auto;
-      align-items: center;
     }
 
-    .poster-container {
-      width: 100%;
-      max-width: 440px;
-      border-radius: 18px;
-      overflow: hidden;
+    .splash-top-banner {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: #dcfce7;
+      border: 1px solid #86efac;
+      font-size: 11px;
+      font-weight: 800;
+      color: #15803d;
+      margin-bottom: 6px;
+      align-self: center;
+    }
+
+    .splash-title {
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--brand-pine);
+      text-align: center;
+      letter-spacing: -0.5px;
+      margin-top: 4px;
+    }
+
+    .splash-subtitle {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .reference-card-container {
+      background: rgba(255, 255, 255, 0.95);
       border: 1px solid var(--card-border);
-      box-shadow: 0 8px 30px rgba(17, 78, 74, 0.1);
-      background: #ffffff;
+      border-radius: 20px;
+      padding: 16px 14px;
+      box-shadow: 0 6px 24px rgba(15, 44, 53, 0.06);
+    }
+
+    .card-header-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--text-dark);
+      text-align: center;
+      letter-spacing: 0.5px;
+      margin-bottom: 14px;
+    }
+
+    /* 2x2 Grid from the Reference Card */
+    .checklist-2x2-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .ref-tile {
+      background: #f8fafc;
+      border: 1px solid rgba(148, 185, 198, 0.3);
+      border-radius: 12px;
+      padding: 10px 8px;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
+      text-align: center;
     }
 
-    .poster-img {
-      width: 100%;
-      height: auto;
-      display: block;
-      object-fit: contain;
+    .tile-step-indicator {
+      font-size: 8.5px;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      align-self: flex-start;
     }
 
-    .splash-controls-wrap {
+    .tile-graphic-area {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
       width: 100%;
-      max-width: 440px;
+    }
+
+    .tile-headline {
+      font-size: 10.5px;
+      font-weight: 900;
+      color: var(--brand-pine);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      line-height: 1.2;
+    }
+
+    .tile-description {
+      font-size: 9.5px;
+      font-weight: 500;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    .mini-pills-preview {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px;
+      width: 100%;
+    }
+
+    .mini-pill {
+      font-size: 8px;
+      font-weight: 700;
+      padding: 2px 4px;
+      border-radius: 6px;
+      text-align: center;
     }
 
     .btn-launch-feed {
@@ -374,7 +465,7 @@
       cursor: pointer;
       box-shadow: 0 6px 20px rgba(19, 192, 206, 0.4);
       width: 100%;
-      margin-top: 10px;
+      margin-top: 14px;
       transition: transform 0.1s ease;
     }
     .btn-launch-feed:active { transform: scale(0.98); }
@@ -390,16 +481,90 @@
 </head>
 <body>
 
-  <!-- FULL RESPONSIVE APP CONTAINER -->
-  <div id="app-container">
+  <!-- MOBILE-STANDARDIZED CANVAS VIEWPORT -->
+  <div id="phone-frame">
 
     <!-- FRONT PAGE: EMBEDDED GUIDE DISPLAY -->
     <div id="manual-splash">
-      <div class="poster-container">
-        <img src="guide.png" alt="Active Biomechanics Coach Guide" class="poster-img" id="poster-element" onerror="this.src='https://raw.githubusercontent.com/tharun1234758/workout-coach/main/guide.png';">
+      <div style="display: flex; flex-direction: column;">
+        <div class="splash-top-banner">⚡ ACTIVE BIOMECHANICS V2.8 // MOTION HUB</div>
+        <h1 class="splash-title">BIOMECHANIC COACH</h1>
+        <p class="splash-subtitle">Real-Time Joint Tracking & Exercise Analytics</p>
+
+        <!-- Centered Checklist Card -->
+        <div class="reference-card-container">
+          <div class="card-header-label">ONBOARDING SYSTEM READINESS CHECKLIST</div>
+
+          <div class="checklist-2x2-grid">
+            <!-- Tile 1: Camera Framing -->
+            <div class="ref-tile">
+              <span class="tile-step-indicator">STEP 01</span>
+              <div class="tile-graphic-area">
+                <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
+                  <rect x="4" y="10" width="16" height="11" rx="2" stroke="#0f2c35" stroke-width="1.8" fill="#f8fafc"/>
+                  <circle x="12" y="15.5" r="1.5" fill="#14b8a6"/>
+                  <line x1="12" y1="21" x2="8" y2="35" stroke="#0f2c35" stroke-width="1.8" stroke-linecap="round"/>
+                  <line x1="12" y1="21" x2="16" y2="35" stroke="#0f2c35" stroke-width="1.8" stroke-linecap="round"/>
+                  <circle cx="34" cy="12" r="3" fill="#fb7185"/>
+                  <path d="M34 15v8l-4 5v6M34 23l5 4 4 7" stroke="#114e4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="tile-headline">CAMERA FRAMING</div>
+              <div class="tile-description">Place phone on a stable surface. Stand sideways for Squats/Lunges.</div>
+            </div>
+
+            <!-- Tile 2: Select Exercise -->
+            <div class="ref-tile">
+              <span class="tile-step-indicator">STEP 02</span>
+              <div class="tile-graphic-area">
+                <div class="mini-pills-preview">
+                  <div class="mini-pill" style="background: var(--pill-squat); color: var(--pill-squat-txt);">Squats</div>
+                  <div class="mini-pill" style="background: var(--pill-curl); color: var(--pill-curl-txt);">Curls</div>
+                  <div class="mini-pill" style="background: var(--pill-press); color: var(--pill-press-txt);">Press</div>
+                  <div class="mini-pill" style="background: var(--pill-raise); color: var(--pill-raise-txt);">Raises</div>
+                </div>
+              </div>
+              <div class="tile-headline">SELECT EXERCISE</div>
+              <div class="tile-description">Switch between 6 pre-configured movement profiles in header pills.</div>
+            </div>
+
+            <!-- Tile 3: Target Goal -->
+            <div class="ref-tile">
+              <span class="tile-step-indicator">STEP 03</span>
+              <div class="tile-graphic-area">
+                <svg width="40" height="40" viewBox="0 0 36 36" fill="none">
+                  <circle cx="18" cy="18" r="14" stroke="#fb7185" stroke-width="2" fill="#fff"/>
+                  <circle cx="18" cy="18" r="9" stroke="#0284c7" stroke-width="2"/>
+                  <circle cx="18" cy="18" r="4" fill="#fb7185"/>
+                </svg>
+              </div>
+              <div class="tile-headline">TARGET GOAL</div>
+              <div class="tile-description">Tap Goal to set custom target. Track RPM, cadence, & finish alerts.</div>
+            </div>
+
+            <!-- Tile 4: Audio & Visual Cues -->
+            <div class="ref-tile">
+              <span class="tile-step-indicator">STEP 04</span>
+              <div class="tile-graphic-area">
+                <svg width="42" height="42" viewBox="0 0 40 40" fill="none">
+                  <path d="M6 14h5l6-5v18l-6-5H6z" fill="#f59e0b"/>
+                  <path d="M20 12c2 2 2 8 0 10" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"/>
+                  <circle cx="28" cy="10" r="3" fill="#14b8a6"/>
+                  <circle cx="34" cy="20" r="3" fill="#14b8a6"/>
+                  <circle cx="28" cy="30" r="3" fill="#14b8a6"/>
+                  <line x1="28" y1="10" x2="34" y2="20" stroke="#114e4a" stroke-width="1.8"/>
+                  <line x1="34" y1="20" x2="28" y2="30" stroke="#114e4a" stroke-width="1.8"/>
+                </svg>
+              </div>
+              <div class="tile-headline">AUDIO & VISUAL</div>
+              <div class="tile-description">Skeletal lines on keypoints. Voice guides you on form and count.</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="splash-controls-wrap">
+      <!-- Launch Action -->
+      <div>
         <button class="btn-launch-feed" id="btn-launch-app">INITIALIZE CAMERA FEED</button>
         <div class="splash-footer-notes">v2.8 Stable • No hardware required • Powered by MediaPipe & WebRTC</div>
       </div>
@@ -500,7 +665,6 @@
   </div>
 
   <script>
-    // 6 EXERCISES WITH PRECISE BIOMECHANICAL THRESHOLDS
     const DRILLS = {
       SQUATS: {
         name: "Squats",
@@ -603,7 +767,7 @@
       timerEl.textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
     }, 1000);
 
-    // Audio & Voice Engine
+    // Audio Engine
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function speakText(text) {
       if (!voiceEnabled || !('speechSynthesis' in window)) return;
