@@ -12,14 +12,13 @@
 
   <style>
     :root {
-      --bg-dark: #07090e;
-      --card-bg: rgba(14, 18, 27, 0.82);
-      --card-border: rgba(65, 78, 105, 0.5);
+      --bg-dark: #080b11;
+      --card-bg: rgba(13, 17, 26, 0.78);
+      --card-border: rgba(72, 85, 115, 0.45);
       --accent-cyan: #00e5ff;
       --accent-green: #34d399;
       --accent-amber: #fbbf24;
-      --accent-red: #f87171;
-      --text-muted: #94a3b8;
+      --text-muted: #8e9db3;
     }
     * {
       box-sizing: border-box;
@@ -67,15 +66,15 @@
 
     .glass-card {
       background: var(--card-bg);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       border: 1px solid var(--card-border);
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 10px 14px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
     }
 
-    /* Top Navigation & Status */
+    /* Top Bar */
     .header-bar {
       display: flex;
       flex-direction: column;
@@ -96,7 +95,7 @@
       align-items: center;
       gap: 6px;
     }
-    .live-indicator {
+    .live-dot {
       width: 7px;
       height: 7px;
       border-radius: 50%;
@@ -105,11 +104,11 @@
     }
     .hud-controls {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       align-items: center;
     }
     .icon-btn {
-      background: rgba(30, 41, 59, 0.8);
+      background: rgba(28, 36, 52, 0.85);
       border: 1px solid var(--card-border);
       color: #cbd5e1;
       width: 32px;
@@ -118,10 +117,11 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 13px;
       cursor: pointer;
     }
 
-    /* Mode Pill Switchers */
+    /* Exercise Buttons */
     .mode-pills {
       display: flex;
       gap: 6px;
@@ -129,10 +129,10 @@
       padding-bottom: 2px;
     }
     .mode-pill {
-      background: rgba(25, 33, 49, 0.7);
+      background: rgba(22, 29, 44, 0.7);
       border: 1px solid var(--card-border);
       color: var(--text-muted);
-      padding: 6px 12px;
+      padding: 6px 14px;
       border-radius: 20px;
       font-size: 11px;
       font-weight: 700;
@@ -142,59 +142,57 @@
     }
     .mode-pill.active {
       background: var(--accent-cyan);
-      color: #050b14;
+      color: #070b13;
       border-color: var(--accent-cyan);
       box-shadow: 0 0 14px rgba(0, 229, 255, 0.4);
     }
 
-    /* Feedback Banner */
+    /* Live Feedback Status */
     .feedback-banner {
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-top: 4px;
       font-size: 13px;
       font-weight: 600;
     }
-    .feedback-dot {
-      width: 9px;
-      height: 9px;
+    .status-dot {
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background: var(--accent-cyan);
-      box-shadow: 0 0 10px var(--accent-cyan);
+      box-shadow: 0 0 8px var(--accent-cyan);
       flex-shrink: 0;
     }
 
-    /* Middle Telemetry Grid */
-    .telemetry-container {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
+    /* LEFT-DOCKED TELEMETRY COLUMN (Clean & Off-Center) */
+    .telemetry-column {
+      display: flex;
+      flex-direction: column;
       gap: 8px;
-      width: 100%;
-      max-width: 340px;
+      width: 125px;
       margin: auto 0;
     }
     .metric-card {
+      padding: 8px 12px;
       display: flex;
       flex-direction: column;
-      gap: 2px;
     }
     .metric-label {
-      font-size: 9px;
+      font-size: 8.5px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.6px;
       color: var(--text-muted);
     }
     .metric-value-huge {
-      font-size: 34px;
+      font-size: 30px;
       font-weight: 900;
       line-height: 1.1;
       color: var(--accent-green);
       font-variant-numeric: tabular-nums;
     }
     .metric-value {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 800;
       color: #f8fafc;
       font-variant-numeric: tabular-nums;
@@ -215,7 +213,7 @@
     }
     .progress-track {
       width: 100%;
-      height: 8px;
+      height: 7px;
       background: rgba(30, 41, 59, 0.7);
       border-radius: 4px;
       overflow: hidden;
@@ -228,7 +226,7 @@
       transition: width 0.08s ease-out, background-color 0.2s ease;
     }
 
-    /* Start / Permission Splash */
+    /* Start Splash */
     #splash-screen {
       position: absolute;
       inset: 0;
@@ -245,36 +243,35 @@
       background: var(--accent-cyan);
       color: #07090e;
       border: none;
-      padding: 14px 32px;
+      padding: 14px 34px;
       border-radius: 10px;
       font-size: 15px;
       font-weight: 800;
-      letter-spacing: 0.5px;
       cursor: pointer;
       margin-top: 24px;
       box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
     }
 
-    /* Responsive Adaptation for Laptop / Desktop Displays */
+    /* Laptop / Desktop Adaptive Layout */
     @media (min-width: 768px) {
       .hud-overlay {
         padding: 20px;
       }
-      .telemetry-container {
-        grid-template-columns: 1fr;
-        max-width: 190px;
+      .telemetry-column {
+        width: 180px;
         position: absolute;
         left: 20px;
         top: 130px;
+        gap: 10px;
       }
-      .footer-bar {
-        margin-left: 210px;
-      }
-      .brand-title {
-        font-size: 13px;
+      .metric-card {
+        padding: 12px 16px;
       }
       .metric-value-huge {
-        font-size: 42px;
+        font-size: 38px;
+      }
+      .footer-bar {
+        margin-left: 200px;
       }
     }
   </style>
@@ -283,13 +280,13 @@
 
   <!-- Start Screen -->
   <div id="splash-screen">
-    <div style="margin-bottom: 12px; font-size: 26px; font-weight: 900; color: var(--accent-cyan);">
-      AI SPORTS BIOMECHANICS
+    <div style="font-size: 24px; font-weight: 900; color: var(--accent-cyan); margin-bottom: 10px;">
+      AI BIOMECHANICS COACH
     </div>
     <p style="font-size: 13px; color: var(--text-muted); max-width: 320px; line-height: 1.5;">
-      Real-time kinematic joint tracking, rep cadence analysis, and adaptive form validation running completely in your browser.
+      Real-time kinematic joint tracking and repetition analysis running directly in your browser.
     </p>
-    <button class="start-btn interactive" id="btn-start">INITIALIZE WORKOUT</button>
+    <button class="start-btn interactive" id="btn-start">START WORKOUT</button>
   </div>
 
   <div id="viewport">
@@ -301,55 +298,55 @@
       <div class="glass-card header-bar interactive">
         <div class="top-meta-row">
           <div class="brand-title">
-            <span class="live-indicator"></span>
+            <span class="live-dot"></span>
             <span>BIOMECHANIC CORE</span>
           </div>
           <div class="hud-controls">
             <span style="font-size: 12px; font-weight: 700; color: var(--accent-cyan);" id="session-time">00:00</span>
-            <button class="icon-btn" id="btn-audio" title="Toggle Sound">🔊</button>
-            <button class="icon-btn" id="btn-flip" title="Switch Camera">🔄</button>
-            <button class="icon-btn" id="btn-reset" title="Reset Reps">↺</button>
+            <button class="icon-btn" id="btn-audio" title="Mute/Unmute">🔊</button>
+            <button class="icon-btn" id="btn-flip" title="Flip Camera">🔄</button>
+            <button class="icon-btn" id="btn-reset" title="Reset Count">↺</button>
           </div>
         </div>
 
-        <!-- Mode Selectors -->
+        <!-- Exercise Mode Selector -->
         <div class="mode-pills">
           <button class="mode-pill active" data-mode="SQUATS">Squats</button>
           <button class="mode-pill" data-mode="BICEP_CURLS">Bicep Curls</button>
           <button class="mode-pill" data-mode="SHOULDER_PRESS">Overhead Press</button>
         </div>
 
-        <!-- Dynamic Cue Message -->
+        <!-- Feedback Cue -->
         <div class="feedback-banner">
-          <div class="feedback-dot" id="cue-dot"></div>
+          <div class="status-dot" id="cue-dot"></div>
           <span id="cue-text">Stand sideways in frame</span>
         </div>
       </div>
 
-      <!-- Live Telemetry Card Grid -->
-      <div class="telemetry-container interactive">
+      <!-- Docked Side Column (Clean & Compact) -->
+      <div class="telemetry-column interactive">
         <div class="glass-card metric-card">
-          <span class="metric-label">Rep Count</span>
+          <span class="metric-label">Reps</span>
           <span class="metric-value-huge" id="val-reps">00</span>
         </div>
         <div class="glass-card metric-card">
-          <span class="metric-label">Joint Angle</span>
+          <span class="metric-label">Angle</span>
           <span class="metric-value" id="val-angle">-- deg</span>
         </div>
         <div class="glass-card metric-card">
-          <span class="metric-label">Est. Calories</span>
+          <span class="metric-label">Calories</span>
           <span class="metric-value" id="val-cal" style="color: var(--accent-amber);">0.0 kcal</span>
         </div>
         <div class="glass-card metric-card">
-          <span class="metric-label">Form Accuracy</span>
-          <span class="metric-value" id="val-form" style="color: var(--accent-cyan);">100%</span>
+          <span class="metric-label">Form</span>
+          <span class="metric-value" id="val-form" style="color: var(--accent-cyan);">READY</span>
         </div>
       </div>
 
       <!-- Bottom Intensity Progress Card -->
       <div class="glass-card footer-bar interactive">
         <div class="progress-header">
-          <span id="target-label">CONTRACTION INTENSITY</span>
+          <span>CONTRACTION DEPTH</span>
           <span id="progress-pct">0%</span>
         </div>
         <div class="progress-track">
@@ -360,41 +357,36 @@
   </div>
 
   <script>
-    // --- EXERCISE METRICS & BIOMECHANICAL THRESHOLDS ---
     const DRILLS = {
       SQUATS: {
-        name: "Squats",
         left_joints: [23, 25, 27],   // Hip -> Knee -> Ankle
         right_joints: [24, 26, 28],
-        min_ang: 115,  // Comfortable parallel depth
-        max_ang: 150,  // Upright extension
-        invert: true,  // Lower angle = deeper squat
+        min_ang: 115,
+        max_ang: 150,
+        invert: true,
         cal_per_rep: 0.32,
         cues: { down: "Lower your hips", up: "Stand tall", ready: "Squat down with control" }
       },
       BICEP_CURLS: {
-        name: "Bicep Curls",
         left_joints: [11, 13, 15],   // Shoulder -> Elbow -> Wrist
         right_joints: [12, 14, 16],
         min_ang: 50,
         max_ang: 148,
         invert: true,
         cal_per_rep: 0.18,
-        cues: { down: "Curl upward to shoulder", up: "Lower arm completely", ready: "Start with straight arms" }
+        cues: { down: "Curl upward to chest", up: "Lower arm completely", ready: "Start with arm extended" }
       },
       SHOULDER_PRESS: {
-        name: "Overhead Press",
         left_joints: [23, 11, 13],   // Hip -> Shoulder -> Elbow
         right_joints: [24, 12, 14],
         min_ang: 75,
         max_ang: 155,
-        invert: false, // Higher angle = full overhead lockout
+        invert: false,
         cal_per_rep: 0.25,
-        cues: { down: "Press straight overhead", up: "Lower elbows to chest", ready: "Start at collarbone & press" }
+        cues: { down: "Press hands overhead", up: "Lower elbows to chest", ready: "Start at shoulder level" }
       }
     };
 
-    // State
     let activeMode = "SQUATS";
     let reps = 0;
     let reachedPeak = false;
@@ -404,7 +396,6 @@
     let soundEnabled = true;
     let currentFacingMode = "user";
     let startTime = null;
-    let formScore = 100;
 
     // DOM Elements
     const video = document.getElementById('video-feed');
@@ -428,7 +419,7 @@
       timerEl.textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
     }, 1000);
 
-    // Audio Oscillator Sound Chime
+    // Audio Feedback
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function triggerAudioFeedback() {
       if (!soundEnabled) return;
@@ -436,8 +427,8 @@
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5 note
-      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.12); // A5
+      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.12);
       gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
       osc.connect(gain);
@@ -446,14 +437,14 @@
       osc.stop(audioCtx.currentTime + 0.12);
     }
 
-    // Kinematic Joint Angle Math
+    // Kinematic Joint Angle Calculation
     function getAngle(a, b, c) {
       const radians = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
       let ang = Math.abs((radians * 180.0) / Math.PI);
       return ang > 180.0 ? 360.0 - ang : ang;
     }
 
-    // Setup MediaPipe
+    // MediaPipe Pose
     const pose = new Pose({
       locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}`
     });
@@ -485,7 +476,7 @@
       if (res.poseLandmarks) {
         const lm = res.poseLandmarks;
 
-        // Auto Side Detection: Select Left or Right joints based on visibility
+        // Auto Side Detection: Check whether left or right profile is clearer
         const leftScore = (lm[cfg.left_joints[0]]?.visibility || 0) + (lm[cfg.left_joints[1]]?.visibility || 0);
         const rightScore = (lm[cfg.right_joints[0]]?.visibility || 0) + (lm[cfg.right_joints[1]]?.visibility || 0);
         const activeJoints = rightScore > leftScore ? cfg.right_joints : cfg.left_joints;
@@ -497,9 +488,9 @@
         if (p1 && p2 && p3 && p1.visibility > 0.45 && p2.visibility > 0.45 && p3.visibility > 0.45) {
           valid = true;
           const raw = getAngle(p1, p2, p3);
-          smoothedAngle = smoothedAngle === null ? raw : 0.30 * raw + 0.70 * smoothedAngle;
+          smoothedAngle = smoothedAngle === null ? raw : 0.32 * raw + 0.68 * smoothedAngle;
 
-          // Render Biomechanical Skeleton
+          // Glowing Skeleton
           ctx.lineWidth = 4;
           ctx.strokeStyle = "#00e5ff";
           ctx.beginPath();
@@ -511,21 +502,23 @@
           [p1, p2, p3].forEach(pt => {
             ctx.fillStyle = "#ffffff";
             ctx.beginPath();
-            ctx.arc(pt.x * w, pt.y * h, 7, 0, 2 * Math.PI);
+            ctx.arc(pt.x * w, pt.y * h, 6, 0, 2 * Math.PI);
             ctx.fill();
             ctx.strokeStyle = "#00e5ff";
             ctx.stroke();
           });
 
-          // State Machine
+          // State Engine
           const now = Date.now();
           if (cfg.invert) {
             if (smoothedAngle <= cfg.min_ang) {
               reachedPeak = true;
-              state = "CONTRACTED";
+              state = "PEAK";
+              formEl.textContent = "GOOD DEPTH";
+              formEl.style.color = "var(--accent-green)";
               updateFeedback(cfg.cues.up, "#34d399");
             } else if (smoothedAngle >= cfg.max_ang) {
-              if (reachedPeak && state === "CONTRACTED") {
+              if (reachedPeak && state === "PEAK") {
                 if (now - lastRepTimestamp > 450) {
                   reps++;
                   lastRepTimestamp = now;
@@ -533,19 +526,24 @@
                 }
                 reachedPeak = false;
                 state = "READY";
+                formEl.textContent = "COMPLETED";
                 updateFeedback(`Rep #${reps} Counted!`, "#34d399");
               } else {
                 state = "READY";
+                formEl.textContent = "ACTIVE";
+                formEl.style.color = "var(--accent-cyan)";
                 updateFeedback(cfg.cues.ready, "#00e5ff");
               }
             }
           } else {
             if (smoothedAngle >= cfg.max_ang) {
               reachedPeak = true;
-              state = "CONTRACTED";
+              state = "PEAK";
+              formEl.textContent = "LOCKOUT";
+              formEl.style.color = "var(--accent-green)";
               updateFeedback(cfg.cues.up, "#34d399");
             } else if (smoothedAngle <= cfg.min_ang) {
-              if (reachedPeak && state === "CONTRACTED") {
+              if (reachedPeak && state === "PEAK") {
                 if (now - lastRepTimestamp > 450) {
                   reps++;
                   lastRepTimestamp = now;
@@ -553,9 +551,12 @@
                 }
                 reachedPeak = false;
                 state = "READY";
+                formEl.textContent = "COMPLETED";
                 updateFeedback(`Rep #${reps} Counted!`, "#34d399");
               } else {
                 state = "READY";
+                formEl.textContent = "ACTIVE";
+                formEl.style.color = "var(--accent-cyan)";
                 updateFeedback(cfg.cues.ready, "#00e5ff");
               }
             }
@@ -566,11 +567,13 @@
       ctx.restore();
 
       if (!valid) {
-        updateFeedback("Position athlete sideways in frame", "#94a3b8");
+        updateFeedback("Position body sideways in frame", "#8e9db3");
+        formEl.textContent = "STANDBY";
+        formEl.style.color = "var(--text-muted)";
         smoothedAngle = cfg.invert ? cfg.max_ang : cfg.min_ang;
       }
 
-      // Update HUD Values
+      // Metric Updates
       repsEl.textContent = String(reps).padStart(2, '0');
       angleEl.textContent = `${Math.round(smoothedAngle)} deg`;
       calEl.textContent = `${(reps * cfg.cal_per_rep).toFixed(1)} kcal`;
@@ -592,7 +595,7 @@
       cueDot.style.boxShadow = `0 0 10px ${color}`;
     }
 
-    // Camera Stream
+    // Camera Management
     let cameraInstance = null;
     function initCamera() {
       if (cameraInstance) cameraInstance.stop();
@@ -605,7 +608,7 @@
       cameraInstance.start();
     }
 
-    // Control Listeners
+    // Controls
     document.getElementById('btn-flip').onclick = () => {
       currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
       initCamera();
@@ -617,6 +620,7 @@
       state = "READY";
       repsEl.textContent = "00";
       calEl.textContent = "0.0 kcal";
+      formEl.textContent = "RESET";
     };
 
     document.getElementById('btn-audio').onclick = (e) => {
