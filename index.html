@@ -12,9 +12,9 @@
 
   <style>
     :root {
-      --bg-dark: #080b11;
-      --card-bg: rgba(13, 17, 26, 0.78);
-      --card-border: rgba(72, 85, 115, 0.45);
+      --bg-dark: #07090e;
+      --card-bg: rgba(13, 17, 26, 0.85);
+      --card-border: rgba(65, 80, 110, 0.45);
       --accent-cyan: #00e5ff;
       --accent-green: #34d399;
       --accent-amber: #fbbf24;
@@ -51,34 +51,28 @@
       object-fit: cover;
     }
 
-    /* HUD Layout */
-    .hud-overlay {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 12px;
-      pointer-events: none;
-      z-index: 10;
-    }
-    .interactive { pointer-events: auto; }
-
+    /* Common Glass Card */
     .glass-card {
       background: var(--card-bg);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 10px 14px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+      border-radius: 12px;
+      padding: 8px 12px;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
+      pointer-events: auto;
     }
 
-    /* Top Bar */
+    /* 1. TOP HEADER (Fixed to Top) */
     .header-bar {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
+      z-index: 20;
     }
     .top-meta-row {
       display: flex;
@@ -88,19 +82,18 @@
     .brand-title {
       font-size: 11px;
       font-weight: 800;
-      letter-spacing: 1.5px;
+      letter-spacing: 1.2px;
       color: var(--accent-cyan);
-      text-transform: uppercase;
       display: flex;
       align-items: center;
       gap: 6px;
     }
     .live-dot {
-      width: 7px;
-      height: 7px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: var(--accent-green);
-      box-shadow: 0 0 8px var(--accent-green);
+      box-shadow: 0 0 6px var(--accent-green);
     }
     .hud-controls {
       display: flex;
@@ -111,30 +104,35 @@
       background: rgba(28, 36, 52, 0.85);
       border: 1px solid var(--card-border);
       color: #cbd5e1;
-      width: 32px;
-      height: 32px;
+      width: 30px;
+      height: 30px;
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 13px;
+      font-size: 12px;
       cursor: pointer;
     }
 
-    /* Exercise Buttons */
-    .mode-pills {
+    /* Exercise Buttons & Goal Target Selector */
+    .controls-row {
       display: flex;
+      justify-content: space-between;
+      align-items: center;
       gap: 6px;
       overflow-x: auto;
-      padding-bottom: 2px;
+    }
+    .mode-pills {
+      display: flex;
+      gap: 5px;
     }
     .mode-pill {
       background: rgba(22, 29, 44, 0.7);
       border: 1px solid var(--card-border);
       color: var(--text-muted);
-      padding: 6px 14px;
+      padding: 5px 11px;
       border-radius: 20px;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
       white-space: nowrap;
       cursor: pointer;
@@ -144,7 +142,18 @@
       background: var(--accent-cyan);
       color: #070b13;
       border-color: var(--accent-cyan);
-      box-shadow: 0 0 14px rgba(0, 229, 255, 0.4);
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+    }
+    .target-pill {
+      background: rgba(22, 29, 44, 0.7);
+      border: 1px solid var(--card-border);
+      color: var(--accent-amber);
+      padding: 5px 8px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
     }
 
     /* Live Feedback Status */
@@ -152,62 +161,70 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
     }
     .status-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: var(--accent-cyan);
       box-shadow: 0 0 8px var(--accent-cyan);
       flex-shrink: 0;
     }
 
-    /* LEFT-DOCKED TELEMETRY COLUMN (Clean & Off-Center) */
+    /* 2. STRICT LEFT-DOCKED TELEMETRY COLUMN (Never Centers) */
     .telemetry-column {
+      position: absolute;
+      left: 10px;
+      top: 128px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      width: 125px;
-      margin: auto 0;
+      gap: 6px;
+      width: 105px;
+      z-index: 20;
     }
     .metric-card {
-      padding: 8px 12px;
+      padding: 6px 10px;
       display: flex;
       flex-direction: column;
     }
     .metric-label {
-      font-size: 8.5px;
+      font-size: 8px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.5px;
       color: var(--text-muted);
     }
     .metric-value-huge {
-      font-size: 30px;
+      font-size: 26px;
       font-weight: 900;
-      line-height: 1.1;
+      line-height: 1.05;
       color: var(--accent-green);
       font-variant-numeric: tabular-nums;
     }
     .metric-value {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 800;
       color: #f8fafc;
       font-variant-numeric: tabular-nums;
     }
 
-    /* Bottom Intensity Meter */
+    /* 3. BOTTOM INTENSITY METER */
     .footer-bar {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      right: 10px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
+      z-index: 20;
     }
     .progress-header {
       display: flex;
       justify-content: space-between;
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
       color: var(--text-muted);
     }
@@ -226,7 +243,23 @@
       transition: width 0.08s ease-out, background-color 0.2s ease;
     }
 
-    /* Start Splash */
+    /* Target Completed Celebration Modal */
+    #celebration-card {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(14, 20, 32, 0.95);
+      border: 2px solid var(--accent-green);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      display: none;
+      z-index: 150;
+      box-shadow: 0 0 35px rgba(52, 211, 153, 0.5);
+    }
+
+    /* Splash / Start Screen */
     #splash-screen {
       position: absolute;
       inset: 0;
@@ -235,7 +268,7 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      z-index: 100;
+      z-index: 200;
       padding: 24px;
       text-align: center;
     }
@@ -243,115 +276,131 @@
       background: var(--accent-cyan);
       color: #07090e;
       border: none;
-      padding: 14px 34px;
+      padding: 13px 32px;
       border-radius: 10px;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 800;
       cursor: pointer;
-      margin-top: 24px;
+      margin-top: 22px;
       box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
     }
 
-    /* Laptop / Desktop Adaptive Layout */
+    /* Laptop & Desktop Responsive Adaptation */
     @media (min-width: 768px) {
-      .hud-overlay {
-        padding: 20px;
+      .header-bar {
+        left: 20px;
+        right: 20px;
+        top: 20px;
       }
       .telemetry-column {
-        width: 180px;
-        position: absolute;
+        width: 160px;
         left: 20px;
-        top: 130px;
+        top: 145px;
         gap: 10px;
       }
       .metric-card {
-        padding: 12px 16px;
+        padding: 10px 14px;
       }
       .metric-value-huge {
         font-size: 38px;
       }
       .footer-bar {
-        margin-left: 200px;
+        left: 195px;
+        right: 20px;
+        bottom: 20px;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- Start Screen -->
+  <!-- Start Splash Screen -->
   <div id="splash-screen">
-    <div style="font-size: 24px; font-weight: 900; color: var(--accent-cyan); margin-bottom: 10px;">
-      AI BIOMECHANICS COACH
+    <div style="font-size: 24px; font-weight: 900; color: var(--accent-cyan); margin-bottom: 8px;">
+      AI SPORTS BIOMECHANICS
     </div>
     <p style="font-size: 13px; color: var(--text-muted); max-width: 320px; line-height: 1.5;">
-      Real-time kinematic joint tracking and repetition analysis running directly in your browser.
+      Kinematic joint tracking, rep cadence tempo, and audio-guided form correction running directly in your browser.
     </p>
-    <button class="start-btn interactive" id="btn-start">START WORKOUT</button>
+    <button class="start-btn" id="btn-start">INITIALIZE WORKOUT</button>
+  </div>
+
+  <!-- Target Complete Modal -->
+  <div id="celebration-card">
+    <div style="font-size: 32px; margin-bottom: 6px;">🎉</div>
+    <div style="font-size: 18px; font-weight: 800; color: var(--accent-green); margin-bottom: 4px;">TARGET COMPLETED!</div>
+    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;" id="target-summary">Goal reached with great form.</div>
+    <button class="mode-pill active" id="btn-dismiss-goal" style="padding: 6px 16px;">CONTINUE</button>
   </div>
 
   <div id="viewport">
     <video id="video-feed" playsinline></video>
     <canvas id="render-canvas"></canvas>
 
-    <div class="hud-overlay">
-      <!-- Top Navigation Card -->
-      <div class="glass-card header-bar interactive">
-        <div class="top-meta-row">
-          <div class="brand-title">
-            <span class="live-dot"></span>
-            <span>BIOMECHANIC CORE</span>
-          </div>
-          <div class="hud-controls">
-            <span style="font-size: 12px; font-weight: 700; color: var(--accent-cyan);" id="session-time">00:00</span>
-            <button class="icon-btn" id="btn-audio" title="Mute/Unmute">🔊</button>
-            <button class="icon-btn" id="btn-flip" title="Flip Camera">🔄</button>
-            <button class="icon-btn" id="btn-reset" title="Reset Count">↺</button>
-          </div>
+    <!-- 1. Top Header -->
+    <div class="glass-card header-bar">
+      <div class="top-meta-row">
+        <div class="brand-title">
+          <span class="live-dot"></span>
+          <span>BIOMECHANIC CORE</span>
         </div>
+        <div class="hud-controls">
+          <span style="font-size: 12px; font-weight: 700; color: var(--accent-cyan);" id="session-time">00:00</span>
+          <button class="icon-btn" id="btn-audio" title="Audio Cues">🔊</button>
+          <button class="icon-btn" id="btn-flip" title="Flip Camera">🔄</button>
+          <button class="icon-btn" id="btn-reset" title="Reset Reps">↺</button>
+        </div>
+      </div>
 
-        <!-- Exercise Mode Selector -->
+      <!-- Controls Row: Exercise Modes & Target Goal Selector -->
+      <div class="controls-row">
         <div class="mode-pills">
           <button class="mode-pill active" data-mode="SQUATS">Squats</button>
           <button class="mode-pill" data-mode="BICEP_CURLS">Bicep Curls</button>
-          <button class="mode-pill" data-mode="SHOULDER_PRESS">Overhead Press</button>
+          <button class="mode-pill" data-mode="SHOULDER_PRESS">Press</button>
         </div>
-
-        <!-- Feedback Cue -->
-        <div class="feedback-banner">
-          <div class="status-dot" id="cue-dot"></div>
-          <span id="cue-text">Stand sideways in frame</span>
-        </div>
+        <button class="target-pill" id="btn-goal">GOAL: 10</button>
       </div>
 
-      <!-- Docked Side Column (Clean & Compact) -->
-      <div class="telemetry-column interactive">
-        <div class="glass-card metric-card">
-          <span class="metric-label">Reps</span>
-          <span class="metric-value-huge" id="val-reps">00</span>
-        </div>
-        <div class="glass-card metric-card">
-          <span class="metric-label">Angle</span>
-          <span class="metric-value" id="val-angle">-- deg</span>
-        </div>
-        <div class="glass-card metric-card">
-          <span class="metric-label">Calories</span>
-          <span class="metric-value" id="val-cal" style="color: var(--accent-amber);">0.0 kcal</span>
-        </div>
-        <div class="glass-card metric-card">
-          <span class="metric-label">Form</span>
-          <span class="metric-value" id="val-form" style="color: var(--accent-cyan);">READY</span>
-        </div>
+      <!-- Live Dynamic Coaching Cue -->
+      <div class="feedback-banner">
+        <div class="status-dot" id="cue-dot"></div>
+        <span id="cue-text">Stand sideways in camera frame</span>
       </div>
+    </div>
 
-      <!-- Bottom Intensity Progress Card -->
-      <div class="glass-card footer-bar interactive">
-        <div class="progress-header">
-          <span>CONTRACTION DEPTH</span>
-          <span id="progress-pct">0%</span>
-        </div>
-        <div class="progress-track">
-          <div class="progress-fill" id="progress-bar"></div>
-        </div>
+    <!-- 2. Strictly Docked Side Column (Leaves Body Completely Clear) -->
+    <div class="telemetry-column">
+      <div class="glass-card metric-card">
+        <span class="metric-label">Reps</span>
+        <span class="metric-value-huge" id="val-reps">00</span>
+      </div>
+      <div class="glass-card metric-card">
+        <span class="metric-label">Joint Angle</span>
+        <span class="metric-value" id="val-angle">-- deg</span>
+      </div>
+      <div class="glass-card metric-card">
+        <span class="metric-label">Cadence</span>
+        <span class="metric-value" id="val-pace" style="color: var(--accent-cyan);">0 RPM</span>
+      </div>
+      <div class="glass-card metric-card">
+        <span class="metric-label">Calories</span>
+        <span class="metric-value" id="val-cal" style="color: var(--accent-amber);">0.0 kcal</span>
+      </div>
+      <div class="glass-card metric-card">
+        <span class="metric-label">Form Grade</span>
+        <span class="metric-value" id="val-form" style="color: var(--accent-green);">A+</span>
+      </div>
+    </div>
+
+    <!-- 3. Bottom Progress Bar -->
+    <div class="glass-card footer-bar">
+      <div class="progress-header">
+        <span>CONTRACTION DEPTH</span>
+        <span id="progress-pct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-bar"></div>
       </div>
     </div>
   </div>
@@ -374,7 +423,7 @@
         max_ang: 148,
         invert: true,
         cal_per_rep: 0.18,
-        cues: { down: "Curl upward to chest", up: "Lower arm completely", ready: "Start with arm extended" }
+        cues: { down: "Curl upward to chest", up: "Lower arm completely", ready: "Start with straight arms" }
       },
       SHOULDER_PRESS: {
         left_joints: [23, 11, 13],   // Hip -> Shoulder -> Elbow
@@ -389,11 +438,14 @@
 
     let activeMode = "SQUATS";
     let reps = 0;
+    let targetGoal = 10;
+    const goalOptions = [5, 10, 15, 20];
     let reachedPeak = false;
     let state = "READY";
     let smoothedAngle = null;
     let lastRepTimestamp = 0;
-    let soundEnabled = true;
+    let repTimestamps = [];
+    let voiceEnabled = true;
     let currentFacingMode = "user";
     let startTime = null;
 
@@ -403,6 +455,7 @@
     const ctx = canvas.getContext('2d');
     const repsEl = document.getElementById('val-reps');
     const angleEl = document.getElementById('val-angle');
+    const paceEl = document.getElementById('val-pace');
     const calEl = document.getElementById('val-cal');
     const formEl = document.getElementById('val-form');
     const cueText = document.getElementById('cue-text');
@@ -410,7 +463,10 @@
     const progressBar = document.getElementById('progress-bar');
     const progressPct = document.getElementById('progress-pct');
     const timerEl = document.getElementById('session-time');
+    const goalBtn = document.getElementById('btn-goal');
     const splash = document.getElementById('splash-screen');
+    const celebrationCard = document.getElementById('celebration-card');
+    const targetSummary = document.getElementById('target-summary');
 
     // Timer
     setInterval(() => {
@@ -419,17 +475,25 @@
       timerEl.textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
     }, 1000);
 
-    // Audio Feedback
+    // Audio & Speech Synthesis
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function triggerAudioFeedback() {
-      if (!soundEnabled) return;
+    function speakText(text) {
+      if (!voiceEnabled || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.rate = 1.15;
+      u.pitch = 1.0;
+      window.speechSynthesis.speak(u);
+    }
+
+    function playBeep() {
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = 'sine';
       osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
       osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.12);
-      gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
       osc.connect(gain);
       gain.connect(audioCtx.destination);
@@ -444,7 +508,7 @@
       return ang > 180.0 ? 360.0 - ang : ang;
     }
 
-    // MediaPipe Pose
+    // MediaPipe Pose Initialization
     const pose = new Pose({
       locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${f}`
     });
@@ -476,7 +540,7 @@
       if (res.poseLandmarks) {
         const lm = res.poseLandmarks;
 
-        // Auto Side Detection: Check whether left or right profile is clearer
+        // Auto Side Selection: Check profile clarity
         const leftScore = (lm[cfg.left_joints[0]]?.visibility || 0) + (lm[cfg.left_joints[1]]?.visibility || 0);
         const rightScore = (lm[cfg.right_joints[0]]?.visibility || 0) + (lm[cfg.right_joints[1]]?.visibility || 0);
         const activeJoints = rightScore > leftScore ? cfg.right_joints : cfg.left_joints;
@@ -490,7 +554,7 @@
           const raw = getAngle(p1, p2, p3);
           smoothedAngle = smoothedAngle === null ? raw : 0.32 * raw + 0.68 * smoothedAngle;
 
-          // Glowing Skeleton
+          // Render Glowing Joint Lines
           ctx.lineWidth = 4;
           ctx.strokeStyle = "#00e5ff";
           ctx.beginPath();
@@ -508,13 +572,13 @@
             ctx.stroke();
           });
 
-          // State Engine
+          // State Machine
           const now = Date.now();
           if (cfg.invert) {
             if (smoothedAngle <= cfg.min_ang) {
               reachedPeak = true;
               state = "PEAK";
-              formEl.textContent = "GOOD DEPTH";
+              formEl.textContent = "A+";
               formEl.style.color = "var(--accent-green)";
               updateFeedback(cfg.cues.up, "#34d399");
             } else if (smoothedAngle >= cfg.max_ang) {
@@ -522,16 +586,16 @@
                 if (now - lastRepTimestamp > 450) {
                   reps++;
                   lastRepTimestamp = now;
-                  triggerAudioFeedback();
+                  repTimestamps.push(now);
+                  playBeep();
+                  speakText(String(reps));
+                  checkGoalAchievement();
                 }
                 reachedPeak = false;
                 state = "READY";
-                formEl.textContent = "COMPLETED";
                 updateFeedback(`Rep #${reps} Counted!`, "#34d399");
               } else {
                 state = "READY";
-                formEl.textContent = "ACTIVE";
-                formEl.style.color = "var(--accent-cyan)";
                 updateFeedback(cfg.cues.ready, "#00e5ff");
               }
             }
@@ -539,7 +603,7 @@
             if (smoothedAngle >= cfg.max_ang) {
               reachedPeak = true;
               state = "PEAK";
-              formEl.textContent = "LOCKOUT";
+              formEl.textContent = "A+";
               formEl.style.color = "var(--accent-green)";
               updateFeedback(cfg.cues.up, "#34d399");
             } else if (smoothedAngle <= cfg.min_ang) {
@@ -547,16 +611,16 @@
                 if (now - lastRepTimestamp > 450) {
                   reps++;
                   lastRepTimestamp = now;
-                  triggerAudioFeedback();
+                  repTimestamps.push(now);
+                  playBeep();
+                  speakText(String(reps));
+                  checkGoalAchievement();
                 }
                 reachedPeak = false;
                 state = "READY";
-                formEl.textContent = "COMPLETED";
                 updateFeedback(`Rep #${reps} Counted!`, "#34d399");
               } else {
                 state = "READY";
-                formEl.textContent = "ACTIVE";
-                formEl.style.color = "var(--accent-cyan)";
                 updateFeedback(cfg.cues.ready, "#00e5ff");
               }
             }
@@ -567,18 +631,22 @@
       ctx.restore();
 
       if (!valid) {
-        updateFeedback("Position body sideways in frame", "#8e9db3");
-        formEl.textContent = "STANDBY";
-        formEl.style.color = "var(--text-muted)";
+        updateFeedback("Position athlete in frame", "#8e9db3");
+        formEl.textContent = "--";
         smoothedAngle = cfg.invert ? cfg.max_ang : cfg.min_ang;
       }
 
-      // Metric Updates
+      // Live Telemetry Value Updates
       repsEl.textContent = String(reps).padStart(2, '0');
       angleEl.textContent = `${Math.round(smoothedAngle)} deg`;
       calEl.textContent = `${(reps * cfg.cal_per_rep).toFixed(1)} kcal`;
 
-      // Intensity Percentage Fill
+      // Live Cadence (Reps Per Minute calculation)
+      const oneMinuteAgo = Date.now() - 60000;
+      repTimestamps = repTimestamps.filter(t => t > oneMinuteAgo);
+      paceEl.textContent = `${repTimestamps.length} RPM`;
+
+      // Depth Progress Bar
       let progress = cfg.invert
         ? (cfg.max_ang - smoothedAngle) / (cfg.max_ang - cfg.min_ang)
         : (smoothedAngle - cfg.min_ang) / (cfg.max_ang - cfg.min_ang);
@@ -589,13 +657,21 @@
       progressBar.style.background = pct >= 95 ? "var(--accent-green)" : "var(--accent-cyan)";
     }
 
+    function checkGoalAchievement() {
+      if (reps === targetGoal) {
+        celebrationCard.style.display = 'block';
+        targetSummary.textContent = `Completed ${targetGoal} ${DRILLS[activeMode].name} successfully!`;
+        speakText(`Goal completed! Great job.`);
+      }
+    }
+
     function updateFeedback(text, color) {
       cueText.textContent = text;
       cueDot.style.background = color;
-      cueDot.style.boxShadow = `0 0 10px ${color}`;
+      cueDot.style.boxShadow = `0 0 8px ${color}`;
     }
 
-    // Camera Management
+    // Camera Lifecycle
     let cameraInstance = null;
     function initCamera() {
       if (cameraInstance) cameraInstance.stop();
@@ -608,7 +684,7 @@
       cameraInstance.start();
     }
 
-    // Controls
+    // Interactive Button Listeners
     document.getElementById('btn-flip').onclick = () => {
       currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
       initCamera();
@@ -616,16 +692,27 @@
 
     document.getElementById('btn-reset').onclick = () => {
       reps = 0;
+      repTimestamps = [];
       reachedPeak = false;
       state = "READY";
       repsEl.textContent = "00";
       calEl.textContent = "0.0 kcal";
-      formEl.textContent = "RESET";
+      paceEl.textContent = "0 RPM";
     };
 
     document.getElementById('btn-audio').onclick = (e) => {
-      soundEnabled = !soundEnabled;
-      e.target.textContent = soundEnabled ? "🔊" : "🔇";
+      voiceEnabled = !voiceEnabled;
+      e.target.textContent = voiceEnabled ? "🔊" : "🔇";
+    };
+
+    goalBtn.onclick = () => {
+      const idx = goalOptions.indexOf(targetGoal);
+      targetGoal = goalOptions[(idx + 1) % goalOptions.length];
+      goalBtn.textContent = `GOAL: ${targetGoal}`;
+    };
+
+    document.getElementById('btn-dismiss-goal').onclick = () => {
+      celebrationCard.style.display = 'none';
     };
 
     document.querySelectorAll('.mode-pill').forEach(btn => {
@@ -634,9 +721,11 @@
         e.target.classList.add('active');
         activeMode = e.target.getAttribute('data-mode');
         reps = 0;
+        repTimestamps = [];
         reachedPeak = false;
         state = "READY";
         smoothedAngle = null;
+        celebrationCard.style.display = 'none';
         updateFeedback(DRILLS[activeMode].cues.ready, "#00e5ff");
       };
     });
