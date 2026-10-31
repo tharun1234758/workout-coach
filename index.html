@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AI Workout Coach - Sports Biomechanics HUD</title>
+  
+  <!-- MediaPipe Pose CDN Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      user-select: none;
+    }
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #0b0e14;
+      color: #fff;
+    }
+    #container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #000;
+    }
+    video {
+      display: none;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    /* HUD Overlays */
+    .hud-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px;
+      z-index: 10;
+    }
+    .glass-card {
+      background: rgba(18, 22, 32, 0.82);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(75, 85, 110, 0.6);
+      border-radius: 12px;
+      padding: 12px 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      pointer-events: auto;
+    }
+    /* Top Bar */
+    .top-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #9cb3c9;
+      text-transform: uppercase;
+    }
+    .timer {
+      font-size: 14px;
+      font-weight: 700;
+      color: #00e6ff;
+      font-variant-numeric: tabular-nums;
+    }
+    .mode-selector {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+    .mode-btn {
+      background: rgba(35, 42, 58, 0.7);
+      border: 1px solid rgba(75, 85, 110, 0.6);
+      color: #cbd5e1;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+    .mode-btn.active {
+      background: #00e6ff;
+      color: #0b0e14;
+      border-color: #00e6ff;
+      box-shadow: 0 0 12px rgba(0, 230, 255, 0.4);
+    }
+    .coach-feedback {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      margin-top: 4px;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #00e6ff;
+      box-shadow: 0 0 8px #00e6ff;
+      flex-shrink: 0;
+    }
+    /* Left Stats Column */
+    .stats-card {
+      width: fit-content;
+      min-width: 110px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: auto;
+      margin-bottom: auto;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .stat-label {
+      font-size: 9px;
+      font-weight: 700;
+      color: #8c9ba5;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .stat-val-reps {
+      font-size: 36px;
+      font-weight: 800;
+      color: #50f078;
+      line-height: 1;
+      margin-top: 2px;
+    }
+    .stat-val {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      margin-top: 2px;
+    }
+    /* Bottom Bar */
+    .bottom-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .progress-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 600;
+      color: #b4c0cf;
+    }
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      background: rgba(40, 45, 55, 0.8);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: #00e6ff;
+      transition: width 0.08s ease-out, background 0.2s ease;
+    }
+    /* Floating Camera Flip Button */
+    .flip-btn {
+      position: absolute;
+      right: 16px;
+      bottom: 80px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(18, 22, 32, 0.85);
+      border: 1px solid rgba(75, 85, 110, 0.6);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      pointer-events: auto;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 20;
+    }
+    /* Permission / Loading Screen */
+    #start-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #0b0e14;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      padding: 24px;
+      text-align: center;
+    }
+    .start-btn {
+      background: #00e6ff;
+      color: #0b0e14;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 20px;
+      box-shadow: 0 0 16px rgba(0, 230, 255, 0.4);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="start-screen">
+    <h2 style="margin-bottom: 8px; color: #00e6ff;">AI Workout Biomechanics</h2>
+    <p style="font-size: 13px; color: #94a3b8; max-width: 300px;">
+      Real-time pose estimation and kinematic angle feedback directly in your phone browser.
+    </p>
+    <button class="start-btn" id="start-btn">Start Workout</button>
+  </div>
+
+  <div id="container">
+    <video id="webcam" playsinline></video>
+    <canvas id="output-canvas"></canvas>
+
+    <div class="hud-layer">
+      <!-- Top Card -->
+      <div class="glass-card top-bar">
+        <div class="header-row">
+          <span class="title">Biomechanics Hub</span>
+          <span class="timer" id="session-timer">00:00</span>
+        </div>
+        <div class="mode-selector">
+          <button class="mode-btn active" data-mode="SQUATS">Squats</button>
+          <button class="mode-btn" data-mode="BICEP_CURLS">Bicep Curls</button>
+          <button class="mode-btn" data-mode="SHOULDER_PRESS">Overhead Press</button>
+        </div>
+        <div class="coach-feedback">
+          <div class="status-dot" id="status-dot"></div>
+          <span id="feedback-text">Position athlete in frame</span>
+        </div>
+      </div>
+
+      <!-- Left Telemetry Card -->
+      <div class="glass-card stats-card">
+        <div class="stat-item">
+          <span class="stat-label">Total Reps</span>
+          <span class="stat-val-reps" id="rep-val">00</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Joint Angle</span>
+          <span class="stat-val" id="angle-val">-- deg</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Phase</span>
+          <span class="stat-val" style="font-size: 13px; color: #00e6ff;" id="state-val">READY</span>
+        </div>
+      </div>
+
+      <!-- Bottom Progress Bar Card -->
+      <div class="glass-card bottom-bar">
+        <div class="progress-label-row">
+          <span>Target Depth Intensity</span>
+          <span id="progress-text">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Flip Camera Button (Front / Rear) -->
+    <button class="flip-btn" id="flip-btn" title="Flip Camera">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 10c0-4.418-3.582-8-8-8s-8 3.582-8 8c0 1.57.453 3.033 1.236 4.275L3 17h5v-5l-1.89 1.89A5.969 5.969 0 0 1 6 10c0-3.314 2.686-6 6-6s6 2.686 6 6c0 1.246-.38 2.404-1.03 3.364l1.436 1.436A7.95 7.95 0 0 0 20 10z"/>
+      </svg>
+    </button>
+  </div>
+
+  <script>
+    // --- EXERCISE DEFINITIONS ---
+    const EXERCISES = {
+      SQUATS: {
+        joints: [23, 25, 27], // Hip -> Knee -> Ankle
+        min_ang: 115,
+        max_ang: 150,
+        invert: true,
+        hint_work: "Lower your hips (parallel)",
+        hint_reset: "Stand all the way up",
+        ready: "Stand sideways & squat down"
+      },
+      BICEP_CURLS: {
+        joints: [11, 13, 15], // Shoulder -> Elbow -> Wrist
+        min_ang: 50,
+        max_ang: 150,
+        invert: true,
+        hint_work: "Curl hand toward shoulder",
+        hint_reset: "Extend arm straight down",
+        ready: "Lower arm & begin curl"
+      },
+      SHOULDER_PRESS: {
+        joints: [23, 11, 13], // Hip -> Shoulder -> Elbow
+        min_ang: 75,
+        max_ang: 155,
+        invert: false,
+        hint_work: "Press hands overhead fully",
+        hint_reset: "Lower elbows to chest",
+        ready: "Start at shoulders & press up"
+      }
+    };
+
+    let currentMode = "SQUATS";
+    let repCount = 0;
+    let state = "READY";
+    let reachedPeak = false;
+    let smoothedAngle = null;
+    const alpha = 0.32; // Smoothing factor
+    let lastRepTime = 0;
+    let currentFacingMode = "user"; // 'user' for front camera, 'environment' for back
+
+    // Elements
+    const videoElement = document.getElementById('webcam');
+    const canvasElement = document.getElementById('output-canvas');
+    const canvasCtx = canvasElement.getContext('2d');
+    const repValEl = document.getElementById('rep-val');
+    const angleValEl = document.getElementById('angle-val');
+    const stateValEl = document.getElementById('state-val');
+    const feedbackTextEl = document.getElementById('feedback-text');
+    const statusDotEl = document.getElementById('status-dot');
+    const progressFillEl = document.getElementById('progress-fill');
+    const progressTextEl = document.getElementById('progress-text');
+    const timerEl = document.getElementById('session-timer');
+    const startScreenEl = document.getElementById('start-screen');
+    const startBtn = document.getElementById('start-btn');
+    const flipBtn = document.getElementById('flip-btn');
+
+    // Timer
+    let startTime = null;
+    setInterval(() => {
+      if (!startTime) return;
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
+      const secs = String(elapsed % 60).padStart(2, '0');
+      timerEl.textContent = `${mins}:${secs}`;
+    }, 1000);
+
+    // Audio Feedback (Beep on complete rep)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playBeep() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5 note
+      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // A5 note
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.15);
+    }
+
+    // Kinematic Joint Angle Calculation
+    function calculateAngle(a, b, c) {
+      const radians = Math.atan2(c.y - b.y, c.x - b.x) - Math.atan2(a.y - b.y, a.x - b.x);
+      let angle = Math.abs((radians * 180.0) / Math.PI);
+      if (angle > 180.0) angle = 360.0 - angle;
+      return angle;
+    }
+
+    // MediaPipe Pose Setup
+    const pose = new Pose({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+    });
+
+    pose.setOptions({
+      modelComplexity: 1,
+      smoothLandmarks: true,
+      minDetectionConfidence: 0.55,
+      minTrackingConfidence: 0.55
+    });
+
+    pose.onResults(onResults);
+
+    function onResults(results) {
+      canvasElement.width = videoElement.videoWidth || 640;
+      canvasElement.height = videoElement.videoHeight || 480;
+      const w = canvasElement.width;
+      const h = canvasElement.height;
+
+      canvasCtx.save();
+      canvasCtx.clearRect(0, 0, w, h);
+
+      // Mirror video if using front camera
+      if (currentFacingMode === 'user') {
+        canvasCtx.translate(w, 0);
+        canvasCtx.scale(-1, 1);
+      }
+      canvasCtx.drawImage(results.image, 0, 0, w, h);
+
+      const ex = EXERCISES[currentMode];
+      let validPose = false;
+
+      if (results.poseLandmarks) {
+        const lm = results.poseLandmarks;
+        const [i1, i2, i3] = ex.joints;
+        const p1 = lm[i1], p2 = lm[i2], p3 = lm[i3];
+
+        if (p1 && p2 && p3 && p1.visibility > 0.45 && p2.visibility > 0.45 && p3.visibility > 0.45) {
+          validPose = true;
+          const rawAngle = calculateAngle(p1, p2, p3);
+
+          if (smoothedAngle === null) smoothedAngle = rawAngle;
+          else smoothedAngle = alpha * rawAngle + (1 - alpha) * smoothedAngle;
+
+          // Draw Glowing Skeleton
+          canvasCtx.lineWidth = 4;
+          canvasCtx.strokeStyle = "#00e6ff";
+          canvasCtx.beginPath();
+          canvasCtx.moveTo(p1.x * w, p1.y * h);
+          canvasCtx.lineTo(p2.x * w, p2.y * h);
+          canvasCtx.lineTo(p3.x * w, p3.y * h);
+          canvasCtx.stroke();
+
+          [p1, p2, p3].forEach(pt => {
+            canvasCtx.fillStyle = "#ffffff";
+            canvasCtx.beginPath();
+            canvasCtx.arc(pt.x * w, pt.y * h, 7, 0, 2 * Math.PI);
+            canvasCtx.fill();
+            canvasCtx.strokeStyle = "#00e6ff";
+            canvasCtx.stroke();
+          });
+
+          // State Machine
+          const now = Date.now();
+          if (ex.invert) {
+            if (smoothedAngle <= ex.min_ang) {
+              reachedPeak = true;
+              state = "PEAK TARGET";
+              setFeedback(ex.hint_reset, "#50f078");
+            } else if (smoothedAngle >= ex.max_ang) {
+              if (reachedPeak && state === "PEAK TARGET") {
+                if (now - lastRepTime > 450) {
+                  repCount++;
+                  lastRepTime = now;
+                  playBeep();
+                }
+                reachedPeak = false;
+                state = "READY";
+                setFeedback(`Rep #${repCount} Completed!`, "#50f078");
+              } else {
+                state = "READY";
+                setFeedback(ex.ready, "#00e6ff");
+              }
+            }
+          } else {
+            if (smoothedAngle >= ex.max_ang) {
+              reachedPeak = true;
+              state = "PEAK TARGET";
+              setFeedback(ex.hint_reset, "#50f078");
+            } else if (smoothedAngle <= ex.min_ang) {
+              if (reachedPeak && state === "PEAK TARGET") {
+                if (now - lastRepTime > 450) {
+                  repCount++;
+                  lastRepTime = now;
+                  playBeep();
+                }
+                reachedPeak = false;
+                state = "READY";
+                setFeedback(`Rep #${repCount} Completed!`, "#50f078");
+              } else {
+                state = "READY";
+                setFeedback(ex.ready, "#00e6ff");
+              }
+            }
+          }
+        }
+      }
+
+      canvasCtx.restore();
+
+      // UI Text updates
+      if (!validPose) {
+        setFeedback("Position athlete in frame", "#8c9ba5");
+        smoothedAngle = ex.invert ? ex.max_ang : ex.min_ang;
+      }
+
+      repValEl.textContent = String(repCount).padStart(2, '0');
+      angleValEl.textContent = `${Math.round(smoothedAngle)} deg`;
+      stateValEl.textContent = state;
+
+      // Progress computation
+      let pct = 0;
+      if (ex.invert) {
+        pct = Math.min(Math.max((ex.max_ang - smoothedAngle) / (ex.max_ang - ex.min_ang), 0), 1);
+      } else {
+        pct = Math.min(Math.max((smoothedAngle - ex.min_ang) / (ex.max_ang - ex.min_ang), 0), 1);
+      }
+      const pctInt = Math.round(pct * 100);
+      progressFillEl.style.width = `${pctInt}%`;
+      progressTextEl.textContent = `${pctInt}%`;
+      progressFillEl.style.background = pctInt >= 95 ? "#50f078" : "#00e6ff";
+    }
+
+    function setFeedback(msg, color) {
+      feedbackTextEl.textContent = msg;
+      statusDotEl.style.background = color;
+      statusDotEl.style.boxShadow = `0 0 8px ${color}`;
+      stateValEl.style.color = color;
+    }
+
+    // Camera Stream Management
+    let camera = null;
+    function startCamera() {
+      if (camera) camera.stop();
+      camera = new Camera(videoElement, {
+        onFrame: async () => {
+          await pose.send({ image: videoElement });
+        },
+        facingMode: currentFacingMode,
+        width: 640,
+        height: 480
+      });
+      camera.start();
+    }
+
+    // Flip Camera Listener
+    flipBtn.addEventListener('click', () => {
+      currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+      startCamera();
+    });
+
+    // Mode Selector Listeners
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        currentMode = e.target.getAttribute('data-mode');
+        repCount = 0;
+        state = "READY";
+        reachedPeak = false;
+        smoothedAngle = null;
+        setFeedback(EXERCISES[currentMode].ready, "#00e6ff");
+      });
+    });
+
+    // Start App
+    startBtn.addEventListener('click', () => {
+      startScreenEl.style.display = 'none';
+      startTime = Date.now();
+      audioCtx.resume();
+      startCamera();
+    });
+  </script>
+</body>
+</html>
