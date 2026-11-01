@@ -40,8 +40,16 @@
       background: #eaf5f7;
     }
 
-    video { display: none; }
+    /* Video element hidden cleanly */
+    video#video-feed {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0.01;
+      pointer-events: none;
+    }
 
+    /* WIDESCREEN CANVAS: Expands edge-to-edge on laptop, fits portrait on phone */
     canvas#render-canvas {
       position: absolute;
       top: 0;
@@ -64,9 +72,10 @@
       pointer-events: auto;
     }
 
+    /* TOP PANEL */
     .top-header-panel {
       position: absolute;
-      top: 55px;
+      top: 55px; /* Offset for phone notches */
       left: 12px;
       right: 12px;
       display: flex;
@@ -128,4 +137,62 @@
       font-size: 11px;
       font-weight: 800;
       cursor: pointer;
-      transition: all
+      transition: all 0.15s ease;
+    }
+
+    .action-btn:active { background: #dcf2f5; }
+
+    /* Exercise Selector Bar matching Reference Graphic */
+    .controls-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .exercise-pills-bar {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 2px;
+    }
+    .exercise-pills-bar::-webkit-scrollbar { display: none; }
+
+    .ex-pill {
+      border: 1.5px solid transparent;
+      padding: 6px 13px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-weight: 800;
+      white-space: nowrap;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .ex-pill[data-mode="SQUATS"] { background: #a7f3d0; color: #065f46; }
+    .ex-pill[data-mode="BICEP_CURLS"] { background: #fecdd3; color: #9f1239; }
+    .ex-pill[data-mode="SHOULDER_PRESS"] { background: #fed7aa; color: #9a3412; }
+    .ex-pill[data-mode="LATERAL_RAISES"] { background: #fef08a; color: #854d0e; }
+    .ex-pill[data-mode="LUNGES"] { background: #ccfbf1; color: #115e59; }
+    .ex-pill[data-mode="LEG_EXTENSIONS"] { background: #e0f2fe; color: #0369a1; }
+
+    .ex-pill.active {
+      box-shadow: 0 0 0 2.5px #114e4a;
+      transform: scale(1.05);
+    }
+
+    .goal-badge-btn {
+      background: #ffffff;
+      border: 1.5px solid #fb7185;
+      color: #e11d48;
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 11.5px;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(251, 113, 133, 0
