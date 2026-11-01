@@ -20,7 +20,6 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* Entire window uses light ambient mint gradient - ZERO BLACK GUTTERS */
     html, body {
       width: 100vw !important;
       height: 100vh !important;
@@ -43,7 +42,6 @@
 
     video { display: none; }
 
-    /* WIDESCREEN CAMERA DISPLAY: Stretches edge-to-edge across entire laptop monitor */
     canvas#render-canvas {
       position: absolute;
       top: 0;
@@ -55,7 +53,6 @@
       display: block;
     }
 
-    /* Glass Panels */
     .theme-panel {
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(14px);
@@ -67,10 +64,9 @@
       pointer-events: auto;
     }
 
-    /* TOP PANEL - Responsive: offsets on mobile, wide on laptop */
     .top-header-panel {
       position: absolute;
-      top: 55px; /* Safely cleared below phone notches */
+      top: 55px;
       left: 12px;
       right: 12px;
       display: flex;
@@ -137,7 +133,6 @@
 
     .action-btn:active { background: #dcf2f5; }
 
-    /* Exercise Selector Bar matching Step 02 Reference */
     .controls-row {
       display: flex;
       justify-content: space-between;
@@ -202,7 +197,6 @@
       color: #114e4a;
     }
 
-    /* LEFT TELEMETRY STACK */
     .telemetry-sidebar {
       position: absolute;
       left: 14px;
@@ -252,7 +246,6 @@
       font-variant-numeric: tabular-nums;
     }
 
-    /* BOTTOM PROGRESS DEPTH */
     .footer-progress-panel {
       position: absolute;
       bottom: 16px;
@@ -298,7 +291,6 @@
       transition: width 0.08s ease-out;
     }
 
-    /* FULLSCREEN ONBOARDING GUIDE OVERLAY */
     #manual-splash {
       position: fixed;
       inset: 0;
@@ -461,7 +453,6 @@
       font-weight: 700;
     }
 
-    /* MODALS */
     #goal-modal, #celebration-card {
       position: fixed;
       top: 50%;
@@ -503,12 +494,11 @@
       <h1 class="splash-title">BIOMECHANIC COACH</h1>
       <p class="splash-subtitle">Real-Time Joint Tracking & Exercise Analytics</p>
 
-      <!-- Centered Reference Card[cite: 5, 6] -->
       <div class="reference-card-container">
         <div class="card-header-label">ONBOARDING SYSTEM READINESS CHECKLIST</div>
 
         <div class="checklist-2x2-grid">
-          <!-- Tile 1: Camera Framing -->
+          <!-- Tile 1 -->
           <div class="ref-tile">
             <span class="tile-step-indicator">STEP 01</span>
             <div class="tile-graphic-area">
@@ -525,7 +515,7 @@
             <div class="tile-description">Place phone on a stable surface. Stand sideways for Squats/Lunges.</div>
           </div>
 
-          <!-- Tile 2: Select Exercise -->
+          <!-- Tile 2 -->
           <div class="ref-tile">
             <span class="tile-step-indicator">STEP 02</span>
             <div class="tile-graphic-area">
@@ -540,7 +530,7 @@
             <div class="tile-description">Switch between 6 pre-configured movement profiles in header pills.</div>
           </div>
 
-          <!-- Tile 3: Target Goal -->
+          <!-- Tile 3 -->
           <div class="ref-tile">
             <span class="tile-step-indicator">STEP 03</span>
             <div class="tile-graphic-area">
@@ -554,7 +544,7 @@
             <div class="tile-description">Tap Goal to set custom target. Track RPM, cadence, & finish alerts.</div>
           </div>
 
-          <!-- Tile 4: Audio & Visual Cues -->
+          <!-- Tile 4 -->
           <div class="ref-tile">
             <span class="tile-step-indicator">STEP 04</span>
             <div class="tile-graphic-area">
@@ -575,7 +565,6 @@
       </div>
     </div>
 
-    <!-- Launch Action -->
     <div class="splash-controls-wrap">
       <button class="btn-launch-feed" id="btn-launch-app">INITIALIZE CAMERA FEED</button>
       <div class="splash-footer-notes">v2.8 Stable • No hardware required • Powered by MediaPipe & WebRTC</div>
@@ -601,7 +590,7 @@
     <button class="btn-launch-feed" id="btn-dismiss-goal" style="padding: 10px; margin-top: 0;">CONTINUE</button>
   </div>
 
-  <!-- MAIN FULLSCREEN CAMERA & HUD -->
+  <!-- MAIN CAMERA & HUD -->
   <div id="camera-screen">
     <video id="video-feed" playsinline></video>
     <canvas id="render-canvas"></canvas>
@@ -771,6 +760,7 @@
     const celebrationCard = document.getElementById('celebration-card');
     const targetSummary = document.getElementById('target-summary');
     const manualSplash = document.getElementById('manual-splash');
+    const launchBtn = document.getElementById('btn-launch-app');
 
     // Timer
     setInterval(() => {
@@ -780,7 +770,16 @@
     }, 1000);
 
     // Audio Engine
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
     function speakText(text) {
       if (!voiceEnabled || !('speechSynthesis' in window)) return;
       window.speechSynthesis.cancel();
@@ -790,18 +789,22 @@
     }
 
     function playBeep() {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(783.99, audioCtx.currentTime + 0.1);
-      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.1);
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(783.99, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.1);
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     function getAngle(a, b, c) {
@@ -823,8 +826,11 @@
     pose.onResults(processFrame);
 
     function processFrame(res) {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+      }
+
       const w = canvas.width;
       const h = canvas.height;
 
@@ -855,7 +861,6 @@
           const raw = getAngle(p1, p2, p3);
           smoothedAngle = smoothedAngle === null ? raw : 0.32 * raw + 0.68 * smoothedAngle;
 
-          // Wireframe Lines
           ctx.lineWidth = 4;
           ctx.strokeStyle = "#13c0ce";
           ctx.beginPath();
@@ -874,7 +879,6 @@
             ctx.stroke();
           });
 
-          // State Machine
           const now = Date.now();
           if (cfg.invert) {
             if (smoothedAngle <= cfg.min_ang) {
@@ -965,17 +969,47 @@
       }
     }
 
-    // Camera Lifecycle
+    // ROBUST UNIVERSAL CAMERA STREAM ENGINE
     let cameraInstance = null;
-    function initCamera() {
-      if (cameraInstance) cameraInstance.stop();
-      cameraInstance = new Camera(video, {
-        onFrame: async () => { await pose.send({ image: video }); },
-        facingMode: currentFacingMode,
-        width: 1280,
-        height: 720
-      });
-      cameraInstance.start();
+    let streamTrack = null;
+
+    async function initCamera() {
+      try {
+        if (cameraInstance) {
+          try { cameraInstance.stop(); } catch (e) {}
+        }
+        if (streamTrack) {
+          streamTrack.stop();
+        }
+
+        // Universal constraints that work on all laptops and phones
+        const constraints = {
+          video: {
+            facingMode: currentFacingMode,
+            width: { ideal: 640 },
+            height: { ideal: 480 }
+          },
+          audio: false
+        };
+
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        streamTrack = stream.getVideoTracks()[0];
+        video.srcObject = stream;
+        await video.play();
+
+        // Native frame processor loop
+        async function renderFrame() {
+          if (!video.paused && !video.ended) {
+            await pose.send({ image: video });
+            requestAnimationFrame(renderFrame);
+          }
+        }
+        requestAnimationFrame(renderFrame);
+
+      } catch (err) {
+        console.error("Camera Init Error:", err);
+        alert("Camera Error: " + err.message + "\nPlease make sure camera permissions are allowed.");
+      }
     }
 
     // Button Listeners
@@ -999,7 +1033,6 @@
       e.target.textContent = voiceEnabled ? "VOL" : "MUTED";
     };
 
-    // Target Rep Goal Handlers
     document.getElementById('btn-open-goal').onclick = (e) => {
       e.stopPropagation();
       goalInput.value = targetGoal;
@@ -1029,7 +1062,6 @@
       manualSplash.style.display = 'flex';
     };
 
-    // Exercise Mode Selection
     document.querySelectorAll('.ex-pill').forEach(btn => {
       btn.onclick = (e) => {
         document.querySelectorAll('.ex-pill').forEach(b => b.classList.remove('active'));
@@ -1045,15 +1077,19 @@
       };
     });
 
-    // Launch Application
-    document.getElementById('btn-launch-app').onclick = () => {
+    // LAUNCH APPLICATION (Immediate Camera Open)
+    launchBtn.addEventListener('click', async () => {
+      launchBtn.textContent = "CONNECTING CAMERA...";
+      launchBtn.style.opacity = "0.7";
+      initAudio();
+      await initCamera();
       manualSplash.style.display = 'none';
+      launchBtn.textContent = "INITIALIZE CAMERA FEED";
+      launchBtn.style.opacity = "1.0";
       if (!startTime) {
         startTime = Date.now();
-        audioCtx.resume();
-        initCamera();
       }
-    };
+    });
   </script>
 </body>
 </html>
