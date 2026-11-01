@@ -40,16 +40,8 @@
       background: #eaf5f7;
     }
 
-    /* Video element hidden cleanly */
-    video#video-feed {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      opacity: 0.01;
-      pointer-events: none;
-    }
+    video { display: none; }
 
-    /* WIDESCREEN CANVAS: Expands edge-to-edge on laptop, fits portrait on phone */
     canvas#render-canvas {
       position: absolute;
       top: 0;
@@ -72,10 +64,9 @@
       pointer-events: auto;
     }
 
-    /* TOP PANEL */
     .top-header-panel {
       position: absolute;
-      top: 55px; /* Offset for phone notches */
+      top: 55px;
       left: 12px;
       right: 12px;
       display: flex;
@@ -142,7 +133,6 @@
 
     .action-btn:active { background: #dcf2f5; }
 
-    /* Exercise Selector Bar matching Reference Graphic */
     .controls-row {
       display: flex;
       justify-content: space-between;
@@ -195,4 +185,11 @@
       cursor: pointer;
       white-space: nowrap;
       flex-shrink: 0;
-      box-shadow: 0 2px 6px rgba(251, 113, 133, 0
+      box-shadow: 0 2px 6px rgba(251, 113, 133, 0.15);
+    }
+
+    .cue-banner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px
