@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Biomechanic Coach - Motion Hub</title>
   
-  <!-- MediaPipe Pose CDN Scripts (Direct standalone versions) -->
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/pose.js" crossorigin="anonymous"></script>
+  <!-- Standalone Stable MediaPipe Pose Engine -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
 
   <style>
     * {
@@ -19,9 +21,9 @@
     }
 
     html, body {
-      width: 100vw !important;
-      height: 100vh !important;
-      overflow: hidden !important;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
       background: #eaf5f7 !important;
       color: #0f2c35;
       position: fixed;
@@ -36,18 +38,19 @@
       background: #eaf5f7;
     }
 
-    /* Video element must be playsinline & muted to autoplay on iOS and Android */
+    /* Video element styled to avoid browser playback throttling */
     video#video-feed {
       position: fixed;
-      top: -9999px;
-      left: -9999px;
-      width: 640px;
-      height: 480px;
-      opacity: 0;
+      top: 0;
+      left: 0;
+      width: 320px;
+      height: 240px;
+      visibility: hidden;
       pointer-events: none;
+      z-index: -1;
     }
 
-    /* Fullscreen canvas covering entire laptop or phone screen */
+    /* Fullscreen Edge-to-Edge Canvas */
     canvas#render-canvas {
       position: absolute;
       top: 0;
@@ -70,10 +73,10 @@
       pointer-events: auto;
     }
 
-    /* Top panel: offset for mobile camera notches, centered on desktop */
+    /* TOP PANEL - Responsive: offsets on mobile, centered on laptop */
     .top-header-panel {
       position: absolute;
-      top: 55px;
+      top: 65px;
       left: 12px;
       right: 12px;
       display: flex;
@@ -140,6 +143,7 @@
 
     .action-btn:active { background: #dcf2f5; }
 
+    /* Exercise Selector Bar matching Step 02 Reference */
     .controls-row {
       display: flex;
       justify-content: space-between;
@@ -208,7 +212,7 @@
     .telemetry-sidebar {
       position: absolute;
       left: 14px;
-      top: 195px;
+      top: 205px;
       display: flex;
       flex-direction: column;
       gap: 7px;
@@ -463,7 +467,7 @@
       font-weight: 700;
     }
 
-    /* Modal windows */
+    /* Modals */
     #goal-modal, #celebration-card {
       position: fixed;
       top: 50%;
@@ -783,12 +787,14 @@
     // Audio Engine
     let audioCtx = null;
     function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+      } catch (e) {}
     }
 
     function speakText(text) {
@@ -822,9 +828,9 @@
       return ang > 180.0 ? 360.0 - ang : ang;
     }
 
-    // MediaPipe Setup
+    // MediaPipe Pose Instance
     const pose = new Pose({
-      locateFile: (f) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5.1675469404/${f}`
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
     });
     pose.setOptions({
       modelComplexity: 1,
@@ -978,8 +984,9 @@
       }
     }
 
-    // Direct Native WebRTC Camera Pipeline (No buggy Camera helper)
+    // Direct Native WebRTC Camera Pipeline with Guaranteed Timeout Protection
     let currentStream = null;
+    let cameraRunning = false;
 
     async function startCamera() {
       if (currentStream) {
@@ -999,30 +1006,43 @@
       currentStream = stream;
       video.srcObject = stream;
 
-      // Wait until video has actual frames ready
+      // Safe, non-hanging frame readiness check
       await new Promise((resolve) => {
-        if (video.readyState >= 2) {
-          resolve();
-        } else {
-          video.onloadeddata = () => resolve();
+        let isDone = false;
+        function finish() {
+          if (!isDone) {
+            isDone = true;
+            resolve();
+          }
         }
+        video.oncanplay = finish;
+        video.onloadeddata = finish;
+        setTimeout(finish, 400); // 400ms guaranteed fallback escape
       });
 
-      await video.play();
-
-      // Continuous frame dispatch
-      let activeLoop = true;
-      async function streamLoop() {
-        if (!video.paused && !video.ended) {
-          try {
-            await pose.send({ image: video });
-          } catch(e) {}
-        }
-        if (activeLoop) {
-          requestAnimationFrame(streamLoop);
-        }
+      try {
+        await video.play();
+      } catch (e) {
+        console.warn("Video auto-play warning:", e);
       }
-      requestAnimationFrame(streamLoop);
+
+      if (!cameraRunning) {
+        cameraRunning = true;
+        let isProcessing = false;
+        async function renderLoop() {
+          if (!video.paused && !video.ended) {
+            if (!isProcessing) {
+              isProcessing = true;
+              try {
+                await pose.send({ image: video });
+              } catch(e) {}
+              isProcessing = false;
+            }
+          }
+          requestAnimationFrame(renderLoop);
+        }
+        requestAnimationFrame(renderLoop);
+      }
     }
 
     // Button Listeners
@@ -1092,7 +1112,7 @@
 
     // Launch Application
     launchBtn.addEventListener('click', async () => {
-      launchBtn.textContent = "STARTING CAMERA...";
+      launchBtn.textContent = "CONNECTING...";
       launchBtn.style.opacity = "0.7";
 
       try {
@@ -1104,7 +1124,7 @@
         }
       } catch (err) {
         console.error("Camera Launch Error:", err);
-        alert("Camera Error: " + err.message + "\n\nPlease click the lock or camera icon in the browser address bar and choose 'Allow'.");
+        alert("Camera Error: " + err.message + "\n\nPlease ensure you tap 'Allow' when the browser asks for camera access.");
         launchBtn.textContent = "INITIALIZE CAMERA FEED";
         launchBtn.style.opacity = "1.0";
       }
