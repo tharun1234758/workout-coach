@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Biomechanic Coach - Motion Hub</title>
+  <title>Biomechanic Coach - Live Motion Hub</title>
   
-  <!-- MediaPipe Pose CDN Scripts -->
+  <!-- MediaPipe Pose CDN Scripts (Exact Working Set) -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
@@ -24,7 +24,7 @@
       width: 100vw;
       height: 100vh;
       overflow: hidden;
-      background: #eaf5f7 !important;
+      background: #eaf5f7;
       color: #0f2c35;
       position: fixed;
       inset: 0;
@@ -38,19 +38,12 @@
       background: #eaf5f7;
     }
 
-    /* Video element MUST remain in layout with minimal size to prevent browser decode throttling */
+    /* Standard hidden video for MediaPipe Camera Utility */
     video#video-feed {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 4px;
-      height: 4px;
-      opacity: 0.01;
-      pointer-events: none;
-      z-index: 1;
+      display: none;
     }
 
-    /* Edge-to-edge canvas across laptop and phone */
+    /* Canvas covers the screen edge-to-edge on laptop and mobile */
     canvas#render-canvas {
       position: absolute;
       top: 0;
@@ -60,7 +53,6 @@
       object-fit: cover !important;
       background: #eaf5f7;
       display: block;
-      z-index: 2;
     }
 
     .theme-panel {
@@ -77,7 +69,7 @@
     /* TOP PANEL */
     .top-header-panel {
       position: absolute;
-      top: 65px; /* Keeps clear of front-facing notch/status bar */
+      top: 65px; /* Keeps clear of front-facing notch/status bar on mobile */
       left: 12px;
       right: 12px;
       display: flex;
@@ -144,6 +136,7 @@
 
     .action-btn:active { background: #dcf2f5; }
 
+    /* Exercise Selector Bar */
     .controls-row {
       display: flex;
       justify-content: space-between;
@@ -311,7 +304,7 @@
       width: 100vw;
       height: 100vh;
       background: radial-gradient(circle at 50% 10%, #f4fafb 0%, #e2eff1 100%);
-      display: flex !important;
+      display: flex;
       flex-direction: column;
       justify-content: space-between;
       z-index: 9999999;
@@ -520,8 +513,8 @@
               <svg width="44" height="44" viewBox="0 0 48 48" fill="none">
                 <rect x="4" y="10" width="16" height="11" rx="2" stroke="#0f2c35" stroke-width="1.8" fill="#f8fafc"/>
                 <circle x="12" y="15.5" r="1.5" fill="#14b8a6"/>
-                <line x1="12" y1="21" x2="8" y2="35" stroke="#0f2c35" stroke-width="1.8" stroke-linecap="round"/>
-                <line x1="12" y1="21" x2="16" y2="35" stroke="#0f2c35" stroke-width="1.8" stroke-linecap="round"/>
+                <line x1="12" y1="21" x2="8" y2="35" stroke="#0f2c35" stroke-width="1.8" fill="#f8fafc"/>
+                <line x1="12" y1="21" x2="16" y2="35" stroke="#0f2c35" stroke-width="1.8" fill="#f8fafc"/>
                 <circle cx="34" cy="12" r="3" fill="#fb7185"/>
                 <path d="M34 15v8l-4 5v6M34 23l5 4 4 7" stroke="#114e4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
@@ -607,7 +600,7 @@
 
   <!-- MAIN FULLSCREEN CAMERA & HUD -->
   <div id="app-container">
-    <video id="video-feed" playsinline muted autoplay></video>
+    <video id="video-feed" playsinline></video>
     <canvas id="render-canvas"></canvas>
 
     <!-- Top Bar -->
@@ -829,27 +822,20 @@
     }
 
     // MediaPipe Pose Instance Initialization
-    let pose = null;
-    try {
-      pose = new Pose({
-        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
-      });
-      pose.setOptions({
-        modelComplexity: 1,
-        smoothLandmarks: true,
-        minDetectionConfidence: 0.55,
-        minTrackingConfidence: 0.55
-      });
-      pose.onResults(processFrame);
-    } catch (e) {
-      console.error("Pose Init Failure:", e);
-    }
+    const pose = new Pose({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+    });
+    pose.setOptions({
+      modelComplexity: 1,
+      smoothLandmarks: true,
+      minDetectionConfidence: 0.55,
+      minTrackingConfidence: 0.55
+    });
+    pose.onResults(processFrame);
 
     function processFrame(res) {
-      if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
 
       const w = canvas.width;
       const h = canvas.height;
@@ -989,66 +975,30 @@
       }
     }
 
-    // Camera Hardware Initializer with Absolute Fallback
-    let activeStream = null;
-    let cameraRunning = false;
+    // Official Proven MediaPipe Camera Utility (Restored from your earlier working build)
+    let cameraInstance = null;
 
-    async function startCamera() {
-      if (activeStream) {
-        activeStream.getTracks().forEach(t => t.stop());
+    function initCamera() {
+      if (cameraInstance) {
+        try { cameraInstance.stop(); } catch (e) {}
       }
 
-      // Universal constraint set avoiding OverconstrainedError on mobile
-      const constraints = {
-        video: {
-          facingMode: currentFacingMode
+      cameraInstance = new Camera(video, {
+        onFrame: async () => {
+          await pose.send({ image: video });
         },
-        audio: false
-      };
-
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      activeStream = stream;
-      video.srcObject = stream;
-
-      // Non-blocking metadata validation
-      await new Promise((resolve) => {
-        let resolved = false;
-        const complete = () => {
-          if (!resolved) {
-            resolved = true;
-            resolve();
-          }
-        };
-        video.onloadedmetadata = complete;
-        video.oncanplay = complete;
-        setTimeout(complete, 400); // 400ms absolute fallback
+        facingMode: currentFacingMode,
+        width: 640,
+        height: 480
       });
 
-      await video.play();
-
-      if (!cameraRunning) {
-        cameraRunning = true;
-        let isProcessing = false;
-        async function renderLoop() {
-          if (!video.paused && !video.ended) {
-            if (!isProcessing && pose) {
-              isProcessing = true;
-              try {
-                await pose.send({ image: video });
-              } catch (e) {}
-              isProcessing = false;
-            }
-          }
-          requestAnimationFrame(renderLoop);
-        }
-        requestAnimationFrame(renderLoop);
-      }
+      return cameraInstance.start();
     }
 
     // Button Listeners
-    document.getElementById('btn-flip').onclick = async () => {
+    document.getElementById('btn-flip').onclick = () => {
       currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
-      await startCamera();
+      initCamera();
     };
 
     document.getElementById('btn-reset').onclick = () => {
@@ -1112,19 +1062,19 @@
 
     // Launch Application
     launchBtn.addEventListener('click', async () => {
-      launchBtn.textContent = "CONNECTING...";
+      launchBtn.textContent = "CONNECTING CAMERA...";
       launchBtn.style.opacity = "0.7";
 
       try {
         initAudio();
-        await startCamera();
+        await initCamera();
         manualSplash.style.display = 'none';
         if (!startTime) {
           startTime = Date.now();
         }
       } catch (err) {
         console.error("Camera Launch Error:", err);
-        alert("Camera Error: " + err.message + "\n\nPlease check browser settings and grant camera access.");
+        alert("Camera Error: " + err.message + "\n\nPlease ensure you tap 'Allow' when the browser asks for camera access.");
         launchBtn.textContent = "INITIALIZE CAMERA FEED";
         launchBtn.style.opacity = "1.0";
       }
